@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BLS 12-Week Program</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .container { max-width: 800px; margin: 0 auto; padding: 12px; }
+
+  /* Header */
+  .header {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .header h1 { font-size: 1.5em; color: #fff; margin-bottom: 4px; }
+  .header p { color: var(--text-dim); font-size: 0.9em; }
+  .stats-bar {
+    display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .stat {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 14px; text-align: center; flex: 1; min-width: 80px;
+  }
+  .stat .num { font-size: 1.4em; font-weight: 700; color: var(--green); }
+  .stat .label { font-size: 0.75em; color: var(--text-dim); }
+
+  /* Import / Export bar */
+  .io-bar {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .io-btn {
+    flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--card); color: var(--accent); cursor: pointer;
+    font-size: 0.85em; text-align: center; transition: all 0.2s;
+  }
+  .io-btn:hover { background: #1c2333; }
+  #importInput { display: none; }
+
+  /* Week navigation */
+  .week-nav {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .week-btn {
+    padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--card); color: var(--text); cursor: pointer;
+    font-size: 0.85em; transition: all 0.2s;
+  }
+  .week-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .week-btn.completed { border-color: var(--green); }
+  .week-btn:hover { background: #1c2333; }
+
+  /* Day card */
+  .day-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .day-card.completed-day { border-color: var(--green); opacity: 0.85; }
+  .day-card.rest-day { border-color: var(--orange); }
+  .day-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px; cursor: pointer;
+  }
+  .day-header h2 { font-size: 1.1em; color: #fff; }
+  .day-header .day-type {
+    font-size: 0.75em; padding: 2px 10px; border-radius: 20px;
+    background: var(--accent); color: #fff; font-weight: 600;
+  }
+  .day-header .day-type.rest { background: var(--orange); }
+  .day-header .day-type.workout { background: var(--green); }
+  .day-check { font-size: 1.3em; color: var(--text-dim); cursor: pointer; }
+  .day-check.checked { color: var(--green); }
+
+  /* Sections */
+  .section { margin-bottom: 14px; }
+  .section-title {
+    font-size: 0.85em; font-weight: 700; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 8px; letter-spacing: 0.5px;
+  }
+
+  /* Exercise item */
+  .exercise-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  .exercise-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 8px;
+  }
+  .exercise-name { font-weight: 600; color: #fff; font-size: 0.95em; }
+  .exercise-specs { font-size: 0.8em; color: var(--text-dim); margin-top: 2px; }
+  .exercise-check { cursor: pointer; font-size: 1.1em; color: var(--text-dim); flex-shrink: 0; }
+  .exercise-check.checked { color: var(--green); }
+
+  /* Set logging row */
+  .set-log {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
+  }
+  .set-row-label { font-size: 0.78em; color: var(--text-dim); margin-right: 4px; }
+  .set-input {
+    width: 55px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 4px;
+    background: var(--bg); color: var(--text); font-size: 0.85em; text-align: center;
+  }
+  .set-input:focus { outline: none; border-color: var(--accent); }
+  .set-input::placeholder { color: var(--text-dim); font-size: 0.8em; }
+  .set-x { color: var(--text-dim); font-size: 0.8em; }
+  .set-block {
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* RPE / Traffic Light */
+  .rpe-row {
+    display: flex; align-items: center; gap: 6px; margin-top: 6px;
+  }
+  .rpe-label { font-size: 0.78em; color: var(--text-dim); margin-right: 4px; }
+  .rpe-dot {
+    display: inline-block; width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid var(--border); cursor: pointer; text-align: center;
+    line-height: 24px; font-size: 0.75em; font-weight: 700; transition: all 0.15s;
+    background: var(--bg); color: var(--text-dim);
+  }
+  .rpe-dot.easy { border-color: var(--green); }
+  .rpe-dot.easy.selected { background: var(--green); color: #fff; }
+  .rpe-dot.medium { border-color: var(--orange); }
+  .rpe-dot.medium.selected { background: var(--orange); color: #fff; }
+  .rpe-dot.hard { border-color: var(--red); }
+  .rpe-dot.hard.selected { background: var(--red); color: #fff; }
+
+  /* Toggle for description */
+  .desc-toggle {
+    font-size: 0.8em; color: var(--accent); cursor: pointer;
+    margin-top: 6px; display: inline-block;
+  }
+  .exercise-desc {
+    display: none; margin-top: 8px; font-size: 0.85em;
+    color: var(--text-dim); line-height: 1.5;
+    border-top: 1px solid var(--border); padding-top: 8px;
+  }
+  .exercise-desc.show { display: block; }
+  .exercise-desc a {
+    color: var(--accent); text-decoration: none; font-weight: 500;
+  }
+  .exercise-desc a:hover { text-decoration: underline; }
+
+  /* Nutrition section */
+  .macro-row {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
+  }
+  .macro-pill {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 12px; font-size: 0.85em;
+  }
+  .macro-pill .val { font-weight: 700; color: #fff; }
+  .meal-list { list-style: none; }
+  .meal-list li {
+    padding: 6px 0; font-size: 0.85em; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; gap: 8px;
+  }
+  .meal-list li:last-child { border-bottom: none; }
+  .meal-check { cursor: pointer; color: var(--text-dim); flex-shrink: 0; }
+  .meal-check.checked { color: var(--green); }
+  .meal-name { flex: 1; }
+  .meal-cal { color: var(--text-dim); font-size: 0.85em; }
+
+  /* Supplements */
+  .supplement-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 0; font-size: 0.85em;
+  }
+  .supplement-item .check { cursor: pointer; color: var(--text-dim); flex-shrink: 0; }
+  .supplement-item .check.checked { color: var(--green); }
+
+  /* Reset button */
+  .reset-btn {
+    display: block; width: 100%; padding: 12px;
+    background: var(--card); border: 1px solid var(--red); border-radius: 8px;
+    color: var(--red); cursor: pointer; font-size: 0.9em;
+    margin-top: 16px; text-align: center;
+  }
+  .reset-btn:hover { background: #2d1215; }
+
+  /* Toast notification */
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--card); border: 1px solid var(--green); border-radius: 8px;
+    padding: 10px 20px; color: var(--green); font-size: 0.85em;
+    z-index: 999; opacity: 0; transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* Mobile tweaks */
+  @media (max-width: 600px) {
+    .container { padding: 8px; }
+    .header h1 { font-size: 1.2em; }
+    .week-btn { padding: 6px 10px; font-size: 0.8em; }
+    .day-card { padding: 12px; }
+    .exercise-item { padding: 10px; }
+    .set-input { width: 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div class="header">
+    <h1>Bigger Leaner Stronger</h1>
+    <p>12-Week Program &mdash; Based on the book by Michael Matthews</p>
+    <div class="stats-bar">
+      <div class="stat"><div class="num" id="statPct">0%</div><div class="label">Complete</div></div>
+      <div class="stat"><div class="num" id="statDays">0/84</div><div class="label">Checks Done</div></div>
+      <div class="stat"><div class="num" id="statStreak">0</div><div class="label">Week Streak</div></div>
+    </div>
+  </div>
+
+  <div class="io-bar">
+    <button class="io-btn" onclick="exportData()">Download Save</button>
+    <button class="io-btn" onclick="document.getElementById('importInput').click()">Restore Save</button>
+    <input type="file" id="importInput" accept=".json" onchange="importData(event)">
+  </div>
+
+  <div class="week-nav" id="weekNav"></div>
+  <div id="weekContent"></div>
+
+  <button class="reset-btn" onclick="if(confirm('Reset ALL progress?')){localStorage.clear();location.reload()}">Reset All Progress</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== DATA =====
+
+const USER_BW = 180; // default bodyweight lbs — adjust in localStorage
+
+function calcBulking(bw) {
+  return {
+    protein: Math.round(bw * 1),
+    carbs: Math.round(bw * 2),
+    fat: Math.round(bw * 0.4),
+    cals: Math.round(bw * 1 * 4 + bw * 2 * 4 + bw * 0.4 * 9)
+  };
+}
+
+// Exercise library with descriptions and image references
+const EXERCISES = {
+  "Incline Barbell Bench Press": {
+    desc: "Set bench to 30-45° incline. Lie back, retract shoulder blades, grip slightly wider than shoulder-width. Lower bar to just below collarbones with elbows at ~45°. Touch chest, then drive up explosively. Keep feet planted, butt on bench.",
+    img: "images/bench-arm-angles.jpeg",
+    imgLabel: "Bench Press Arm Angles (p. 211)"
+  },
+  "Flat Barbell Bench Press": {
+    desc: "Lie on flat bench, screw shoulder blades into bench, arch lower back slightly (fist-width gap). Grip slightly wider than shoulder-width. Lower bar to bottom of chest (nipple line) in controlled manner, touch chest, drive up. Feet planted, elbows tucked ~45°.",
+    img: "images/bench-arm-angles.jpeg",
+    imgLabel: "Bench Press Form (p. 211)"
+  },
+  "Incline Dumbbell Bench Press": {
+    desc: "Set bench to 30°. Hold dumbbells at shoulders, palms forward. Press up evenly, keeping shoulders retracted. Lower dumbbells to chest level with elbows at ~45°. Don't let dumbbells drift too wide.",
+    img: null
+  },
+  "Flat Dumbbell Bench Press": {
+    desc: "Lie on flat bench, hold dumbbells at chest, palms forward. Press up, keeping shoulders packed. Lower to chest level. Maintain control throughout.",
+    img: null
+  },
+  "Dip (Chest Variation)": {
+    desc: "On parallel bars, lean torso forward ~30°. Lower until upper arms are parallel to floor or slightly below. Press up. Add weight via dip belt when bodyweight gets easy (4-6 reps). Keep elbows flared slightly, not tucked.",
+    img: null
+  },
+  "Barbell Deadlift": {
+    desc: "Stance narrower than shoulder-width, bar over mid-foot. Bend at hips and knees until shins touch bar. Grip bar just outside legs, arms straight. Drive through heels, keeping back neutral and tight. Bar travels up shins, over knees. At top, chest out, shoulders down. Lower with hips back first, then bend knees.",
+    img: "images/deadlift-start.jpeg",
+    imgLabel: "Deadlift Starting Position (p. 227)"
+  },
+  "Barbell Row": {
+    desc: "Hinge at hips with slight knee bend, torso ~45° to floor. Grip bar shoulder-width, palms down. Pull bar to lower chest/upper abs, squeezing shoulder blades. Lower under control. Keep back flat throughout.",
+    img: null
+  },
+  "Wide-Grip Pull-Up": {
+    desc: "Grip bar wider than shoulder-width, palms facing away. Hang with arms extended. Pull chest to bar, squeezing lats. Lower under control. Add weight with belt when you can do 6+ reps.",
+    img: null
+  },
+  "Chin-Up": {
+    desc: "Grip bar shoulder-width, palms facing you. Pull chin over bar, leaning back slightly. Lower under control. Slightly more biceps emphasis than pull-ups.",
+    img: null
+  },
+  "Close-Grip Lat Pulldown": {
+    desc: "Grip bar with close neutral or underhand grip. Lean back slightly, pull bar to upper chest. Squeeze lats. Return under control.",
+    img: null
+  },
+  "Seated Cable Row": {
+    desc: "Sit at cable station, feet braced. Grip handle, keep back straight. Pull handle to stomach, squeeze shoulder blades together. Extend arms under control.",
+    img: null
+  },
+  "T-Bar Row": {
+    desc: "Straddle T-bar, bend at hips, back flat. Pull bar to chest, squeezing back. Lower under control.",
+    img: null
+  },
+  "Barbell Shrug": {
+    desc: "Stand holding barbell at arms' length. Shrug shoulders straight up toward ears, hold for 1 sec. Don't roll shoulders — straight up and down.",
+    img: null
+  },
+  "Barbell Curl": {
+    desc: "Stand with barbell, grip shoulder-width, palms up. Keeping elbows pinned to sides, curl bar to shoulders. Lower under control — don't swing.",
+    img: null
+  },
+  "Alternating Dumbbell Curl": {
+    desc: "Stand with dumbbells, palms facing forward. Curl one arm, keeping elbow stationary. Squeeze at top, lower, alternate. No swinging.",
+    img: null
+  },
+  "Close-Grip Bench Press": {
+    desc: "Same as flat bench but grip slightly narrower than shoulder-width. Keep elbows tucked to sides. Lower bar to bottom of chest, drive up. Targets triceps.",
+    img: "images/bench-arm-angles.jpeg",
+    imgLabel: "Bench Press Setup (p. 211)"
+  },
+  "Seated Triceps Press": {
+    desc: "Sit on bench with back support. Hold dumbbell overhead with both hands (or EZ-bar). Lower behind head by bending elbows. Extend back to start. Keep elbows pointed up.",
+    img: null
+  },
+  "Lying Triceps Extension (Skullcrusher)": {
+    desc: "Lie on flat bench, hold bar or EZ-bar above shoulders with arms extended. Lower bar toward forehead by bending elbows only. Extend back up. Keep elbows pointing at ceiling.",
+    img: null
+  },
+  "Triceps Pushdown": {
+    desc: "Stand at cable station, grip bar palms down, elbows pinned at sides. Push bar down until arms straight. Return slowly. Don't let elbows drift.",
+    img: null
+  },
+  "Seated Barbell Military Press": {
+    desc: "Sit at military press station, feet flat. Grip bar shoulder-width. Lower bar to clavicles, tilt head back to let bar pass nose. Press up, shift head forward, lock out. Keep slight arch, don't overarch.",
+    img: "images/military-press-station.jpeg",
+    imgLabel: "Military Press Setup (p. 245)"
+  },
+  "Standing Barbell Military Press": {
+    desc: "Same as seated but standing. Feet shoulder-width, brace core hard. Press bar from clavicles to overhead. Tilt head back on descent. Squeeze glutes at lockout.",
+    img: null
+  },
+  "Side Lateral Raise": {
+    desc: "Stand with dumbbells at sides, slight forward lean. Raise arms out to sides until parallel to floor, leading with elbows. Pause at top, lower slowly. Use controlled weight — no swinging.",
+    img: null
+  },
+  "Bent-Over Rear Delt Raise": {
+    desc: "Hinge forward with flat back, dumbbells hanging. Raise arms out to sides, squeezing rear delts. Lower under control. Elbows slightly bent throughout.",
+    img: null
+  },
+  "Barbell Squat": {
+    desc: "Position bar below upper-back bone (low-bar) or on traps (high-bar). Grip narrow, thumbs on top. Heels shoulder-width, toes out ~20°. Hips back, sit down keeping chest up. Descend until hips below knees. Drive up through heels, keeping back angle. Look at spot 6ft ahead on floor.",
+    img: "images/squat-setup.jpeg",
+    imgLabel: "Squat Setup (p. 199)"
+  },
+  "Front Squat": {
+    desc: "Bar rests on front of shoulders in clean grip position (elbows high). Feet shoulder-width, toes out slightly. Squat straight down keeping torso upright. Elbows stay high throughout. Drive through heels up.",
+    img: "images/front-squat-grip.jpeg",
+    imgLabel: "Front Squat Grip (p. 203)"
+  },
+  "Leg Press": {
+    desc: "Sit on leg press sled, feet shoulder-width on platform. Lower until knees at ~90°. Drive through entire foot to press up. Don't lock knees at top.",
+    img: null
+  },
+  "Romanian Deadlift": {
+    desc: "Start with bar on safety pins at mid-thigh. Lock knees, back tight. Push hips back, slide bar down thighs past knees. Go as low as you can without back rounding. Drive hips forward to return. Hamstring focus.",
+    img: "images/rdl.jpeg",
+    imgLabel: "Romanian Deadlift (p. 237)"
+  },
+  "Standing Calf Raise": {
+    desc: "Stand on calf raise machine, pads on shoulders. Lower heels as far as possible. Explode up onto tiptoes. Hold at top. Use 2-1-2 tempo. Vary toe position: forward, out 20°, in.",
+    img: null
+  },
+  "Seated Calf Raise": {
+    desc: "Sit on calf raise machine, pads on knees. Lower heels, then raise as high as possible. Use 2-1-2 tempo. Vary toe position.",
+    img: null
+  },
+  "Leg Press Calf Raise": {
+    desc: "Sit on leg press, place balls of feet on edge of platform. Press sled up, then lower heels toward floor. Raise up onto toes. Full range of motion.",
+    img: null
+  },
+  "Donkey Calf Raise": {
+    desc: "Bend forward at hips with support, weight on lower back (or use machine). Lower heels, raise up onto toes. Full ROM.",
+    img: null
+  },
+  // Abs
+  "Cable Crunch": {
+    desc: "Kneel facing cable station with rope attached overhead. Hold rope at temples, crunch down toward knees. Squeeze abs. Return under control.",
+    img: null
+  },
+  "Hanging Leg Raise": {
+    desc: "Hang from pull-up bar. Raise legs until parallel to floor (or higher), squeezing abs. Lower slowly. Add dumbbell between feet for weight.",
+    img: null
+  },
+  "Captain's Chair Leg Raise": {
+    desc: "Support body on captain's chair arm pads, back against pad. Raise knees toward chest, squeeze abs. Lower slowly. Add weight between feet as needed.",
+    img: null
+  },
+  "Ab Roller": {
+    desc: "Kneel on floor holding ab wheel. Roll forward keeping abs tight, extend as far as you can without losing tension. Pull back using abs. Don't let back sag.",
+    img: null
+  },
+  "Air Bicycle": {
+    desc: "Lie on back, hands behind head (not pulling). Bring opposite elbow to knee while extending other leg. Pedal motion. Go to failure.",
+    img: null
+  },
+  "Flat Bench Lying Leg Raise": {
+    desc: "Lie flat on bench, hands gripping behind head. Raise straight legs until perpendicular. Lower under control.",
+    img: null
+  },
+  "Decline Crunch": {
+    desc: "Lie on decline bench, hands crossed on chest. Crunch up, squeeze abs. Lower slowly. Add weight behind head as needed.",
+    img: null
+  }
+};
+
+// Program structure: 12 weeks, 6 days per week (Tue off)
+const SUPPLEMENTS_DAILY = [
+  { name: "Whey protein (pre/post workout)", dose: "30-40g each" },
+  { name: "Creatine monohydrate", dose: "5g post-workout with meal" },
+  { name: "Vitamin D3", dose: "2000-5000 IU daily" },
+  { name: "Fish oil", dose: "2-3g EPA/DHA daily" },
+  { name: "Multivitamin", dose: "1 serving daily" }
+];
+
+const SUPPLEMENTS_REST = [
+  { name: "Vitamin D3", dose: "2000-5000 IU daily" },
+  { name: "Fish oil", dose: "2-3g EPA/DHA daily" },
+  { name: "Multivitamin", dose: "1 serving daily" }
+];
+
+function genMealTemplate(bw, isWorkoutDay) {
+  const m = calcBulking(bw);
+  return {
+    macros: m,
+    meals: [
+      { name: "Breakfast", items: "Eggs, oatmeal, banana", cal: Math.round(m.cals * 0.25), protein: Math.round(m.protein * 0.25) },
+      { name: "Lunch", items: "Chicken/beef, rice, vegetables", cal: Math.round(m.cals * 0.3), protein: Math.round(m.protein * 0.3) },
+      { name: isWorkoutDay ? "Pre-Workout (30min before)" : "Afternoon Snack", items: isWorkoutDay ? "Whey protein + banana/rice milk" : "Nuts, fruit, protein shake", cal: Math.round(m.cals * 0.15), protein: Math.round(m.protein * 0.15) },
+      { name: isWorkoutDay ? "Post-Workout" : "Dinner", items: isWorkoutDay ? "Whey protein + rice/white potato + creatine 5g" : "Fish/chicken, sweet potato, vegetables", cal: Math.round(m.cals * 0.2), protein: Math.round(m.protein * 0.2) },
+      { name: "Dinner", items: "Lean meat, carbs, vegetables", cal: Math.round(m.cals * 0.1), protein: Math.round(m.protein * 0.1) }
+    ]
+  };
+}
+
+const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+function isRestDay(dayOfWeek) {
+  return dayOfWeek === 1; // Tuesday
+}
+
+function getWeekData(weekNum, bw) {
+  const days = [];
+  const isPhase2 = weekNum > 8;
+
+  for (let d = 0; d < 7; d++) {
+    if (isRestDay(d)) {
+      const nut = genMealTemplate(bw, false);
+      days.push({
+        dayName: DAY_NAMES[d],
+        dayOfWeek: d,
+        type: "rest",
+        title: "Rest Day",
+        exercises: [],
+        nutrition: nut,
+        supplements: SUPPLEMENTS_REST
+      });
+      continue;
+    }
+
+    const nut = genMealTemplate(bw, true);
+    let exercises = [];
+    let title = "";
+
+    switch(d) {
+      case 0:
+        title = "Chest & Calves";
+        exercises = [
+          { name: "Incline Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Incline Dumbbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Flat Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: isPhase2 ? "Dip (Chest Variation)" : "Flat Dumbbell Bench Press", numSets: 3, reps: isPhase2 ? "6-8" : "4-6", rest: isPhase2 ? "2 min" : "3 min" },
+          { name: "Standing Calf Raise", numSets: 3, reps: "4-6", rest: "2-3 min" },
+          { name: "Seated Calf Raise", numSets: 3, reps: "4-6", rest: "2-3 min" }
+        ];
+        break;
+      case 2:
+        title = "Back & Abs";
+        exercises = [
+          { name: "Barbell Deadlift", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Barbell Row", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Wide-Grip Pull-Up", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Barbell Shrug", numSets: 2, reps: "4-6", rest: "3 min", optional: true },
+          { name: "Cable Crunch", numSets: 1, reps: "10-12 weighted", rest: "→", circuit: true },
+          { name: "Captain's Chair Leg Raise", numSets: 1, reps: "to failure", rest: "→", circuit: true },
+          { name: "Air Bicycle", numSets: 1, reps: "to failure", rest: "2-3 min", circuit: true }
+        ];
+        break;
+      case 3:
+        title = "Shoulders & Calves";
+        exercises = [
+          { name: "Seated Barbell Military Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Side Lateral Raise", numSets: 3, reps: "4-6", rest: "2-3 min" },
+          { name: "Bent-Over Rear Delt Raise", numSets: 3, reps: "4-6", rest: "2-3 min" },
+          { name: "Leg Press Calf Raise", numSets: 3, reps: "8-10", rest: "1-2 min" },
+          { name: "Standing Calf Raise", numSets: 3, reps: "8-10", rest: "1-2 min" }
+        ];
+        break;
+      case 4:
+        title = "Upper Body & Abs";
+        exercises = [
+          { name: "Incline Barbell Bench Press", numSets: 3, reps: "8-10", rest: "2 min", warmup: true },
+          { name: "Barbell Curl", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Close-Grip Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Alternating Dumbbell Curl", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Seated Triceps Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: isPhase2 ? "Ab Roller" : "Hanging Leg Raise", numSets: 1, reps: "10-12 weighted", rest: "→", circuit: true },
+          { name: "Flat Bench Lying Leg Raise", numSets: 1, reps: "to failure", rest: "→", circuit: true },
+          { name: "Decline Crunch", numSets: 1, reps: "to failure", rest: "2-3 min", circuit: true }
+        ];
+        break;
+      case 5:
+        title = "Legs & Shoulders";
+        exercises = [
+          { name: "Barbell Squat", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Leg Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Romanian Deadlift", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Side Lateral Raise", numSets: 3, reps: "8-10", rest: "1-2 min" },
+          { name: "Bent-Over Rear Delt Raise", numSets: 3, reps: "8-10", rest: "1-2 min" },
+          { name: isPhase2 ? "Donkey Calf Raise" : "Seated Calf Raise", numSets: 3, reps: "12-15", rest: "1 min" },
+          { name: "Standing Calf Raise", numSets: 3, reps: "12-15", rest: "1 min" }
+        ];
+        break;
+      default:
+        title = "Rest / Active Recovery";
+        exercises = [];
+    }
+
+    if (d === 6) {
+      days.push({
+        dayName: DAY_NAMES[d],
+        dayOfWeek: d,
+        type: "rest",
+        title: "Rest / Active Recovery",
+        exercises: [],
+        nutrition: genMealTemplate(bw, false),
+        supplements: SUPPLEMENTS_REST
+      });
+    } else {
+      days.push({
+        dayName: DAY_NAMES[d],
+        dayOfWeek: d,
+        type: "workout",
+        title: title,
+        exercises: exercises,
+        nutrition: nut,
+        supplements: SUPPLEMENTS_DAILY
+      });
+    }
+  }
+
+  return { week: weekNum, days };
+}
+
+// ===== APP STATE =====
+
+const STORAGE_KEY = "bls_progress";
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {}, bw: USER_BW };
+  } catch { return { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {}, bw: USER_BW }; }
+}
+
+function saveProgress(p) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+}
+
+function getStorage() {
+  const p = loadProgress();
+  if (!p.sets) p.sets = {};
+  if (!p.rpe) p.rpe = {};
+  if (!p.bw) p.bw = USER_BW;
+  return p;
+}
+
+// ===== IMPORT / EXPORT =====
+
+function exportData() {
+  const p = loadProgress();
+  const blob = new Blob([JSON.stringify(p, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `bls-program-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("Progress saved to file");
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.exercises || !data.days) {
+        showToast("Invalid save file — missing required fields", true);
+        return;
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      showToast("Progress restored! Refreshing...");
+      setTimeout(() => location.reload(), 800);
+    } catch(err) {
+      showToast("Could not read save file: " + err.message, true);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = "";
+}
+
+function showToast(msg, isError) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.borderColor = isError ? "var(--red)" : "var(--green)";
+  t.style.color = isError ? "var(--red)" : "var(--green)";
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// ===== RENDER =====
+
+let currentWeek = 1;
+
+function makeId(prefix, ...parts) {
+  return prefix + "_" + parts.join("_").replace(/[^a-z0-9]/gi, "_");
+}
+
+function render() {
+  const p = getStorage();
+  const bw = p.bw || USER_BW;
+
+  // Week nav
+  const nav = document.getElementById("weekNav");
+  nav.innerHTML = "";
+  for (let w = 1; w <= 12; w++) {
+    const btn = document.createElement("button");
+    btn.className = "week-btn" + (w === currentWeek ? " active" : "");
+    let allDone = true;
+    for (let d = 0; d < 7; d++) {
+      const dayKey = makeId("day", w, d);
+      if (!p.days[dayKey]) { allDone = false; break; }
+    }
+    if (allDone) btn.className += " completed";
+    btn.textContent = "W" + w;
+    btn.onclick = () => { currentWeek = w; render(); };
+    nav.appendChild(btn);
+  }
+
+  const content = document.getElementById("weekContent");
+  content.innerHTML = "";
+
+  const week = getWeekData(currentWeek, bw);
+
+  const phaseLabel = document.createElement("div");
+  phaseLabel.style.cssText = "text-align:center;margin-bottom:12px;font-size:0.85em;color:var(--text-dim);padding:8px;background:var(--card);border-radius:8px;border:1px solid var(--border);";
+  phaseLabel.innerHTML = currentWeek <= 8
+    ? `Phase 1 (Weeks 1-8) &mdash; Foundation &mdash; Heavy compound emphasis, 4-6 rep range`
+    : `Phase 2 (Weeks 9-12) &mdash; Variation &mdash; Adjusted rep ranges, exercise rotation`;
+  content.appendChild(phaseLabel);
+
+  const abNote = document.createElement("div");
+  abNote.style.cssText = "text-align:center;margin-bottom:12px;font-size:0.8em;color:var(--orange);padding:6px 12px;background:var(--card);border-radius:8px;border:1px solid var(--border);";
+  abNote.innerHTML = "Ab circuits: Do 3-6 rounds &bull; Add weight to first exercise when 12+ reps possible";
+  content.appendChild(abNote);
+
+  for (const day of week.days) {
+    const card = document.createElement("div");
+    const dayKey = makeId("day", currentWeek, day.dayOfWeek);
+    card.className = "day-card" + (p.days[dayKey] ? " completed-day" : "") + (day.type === "rest" ? " rest-day" : "");
+
+    const hdr = document.createElement("div");
+    hdr.className = "day-header";
+    hdr.innerHTML = `
+      <div>
+        <h2>${day.dayName} — ${day.title}</h2>
+      </div>
+      <div>
+        <span class="day-type ${day.type}">${day.type === "rest" ? "REST" : "WORKOUT"}</span>
+        <span class="day-check ${p.days[dayKey] ? "checked" : ""}" data-key="${dayKey}" data-type="day">${p.days[dayKey] ? "✓" : "○"}</span>
+      </div>
+    `;
+    card.appendChild(hdr);
+
+    // Exercises
+    if (day.exercises.length > 0) {
+      const sec = document.createElement("div");
+      sec.className = "section";
+      const secTitle = document.createElement("div");
+      secTitle.className = "section-title";
+      secTitle.textContent = "Exercises";
+      sec.appendChild(secTitle);
+
+      if (day.exercises.some(e => e.warmup)) {
+        const warmNote = document.createElement("div");
+        warmNote.style.cssText = "font-size:0.78em;color:var(--orange);margin-bottom:8px;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border);";
+        warmNote.innerHTML = "Warm-up: 12 reps @50% &bull; 10 reps @50% &bull; 4 reps @70% &bull; 1 rep @90% &bull; Then working sets";
+        sec.appendChild(warmNote);
+      }
+
+      day.exercises.forEach(ex => {
+        const item = document.createElement("div");
+        item.className = "exercise-item";
+        const exKey = makeId("ex", currentWeek, day.dayOfWeek, ex.name.replace(/[^a-z0-9]/gi, "_"));
+        const extra = ex.circuit ? "(Circuit)" : ex.optional ? "(Optional)" : "";
+
+        // Build set log HTML
+        let setLogHtml = "";
+        if (ex.numSets) {
+          setLogHtml = '<div class="set-log">';
+          for (let s = 0; s < ex.numSets; s++) {
+            const setKey = makeId("set", currentWeek, day.dayOfWeek, ex.name.replace(/[^a-z0-9]/gi, "_"), s);
+            const saved = p.sets[setKey] || {};
+            setLogHtml += `
+              <div class="set-block">
+                <span class="set-row-label">S${s+1}</span>
+                <input class="set-input" type="number" min="0" step="1.25" placeholder="kg"
+                  value="${saved.weight || ""}" data-setkey="${setKey}" data-field="weight"
+                  onchange="handleSetInput(this)">
+                <span class="set-x">×</span>
+                <input class="set-input" type="number" min="0" step="1" placeholder="rep"
+                  value="${saved.reps || ""}" data-setkey="${setKey}" data-field="reps"
+                  onchange="handleSetInput(this)">
+              </div>
+            `;
+          }
+          setLogHtml += '</div>';
+        }
+
+        // Build RPE / traffic light HTML
+        const rpeKey = makeId("rpe", currentWeek, day.dayOfWeek, ex.name.replace(/[^a-z0-9]/gi, "_"));
+        const rpeVal = p.rpe[rpeKey] || "";
+        const rpeHtml = `
+          <div class="rpe-row">
+            <span class="rpe-label">Intensity:</span>
+            <span class="rpe-dot easy ${rpeVal === "easy" ? "selected" : ""}" onclick="handleRpe('${rpeKey}','easy',this)">EZ</span>
+            <span class="rpe-dot medium ${rpeVal === "medium" ? "selected" : ""}" onclick="handleRpe('${rpeKey}','medium',this)">OK</span>
+            <span class="rpe-dot hard ${rpeVal === "hard" ? "selected" : ""}" onclick="handleRpe('${rpeKey}','hard',this)">HD</span>
+          </div>
+        `;
+
+        item.innerHTML = `
+          <div class="exercise-header">
+            <div>
+              <div class="exercise-name">${ex.name} ${extra}</div>
+              <div class="exercise-specs">${ex.numSets} x ${ex.reps} &bull; Rest ${ex.rest}</div>
+            </div>
+            <span class="exercise-check ${p.exercises[exKey] ? "checked" : ""}" data-key="${exKey}" data-type="exercise">${p.exercises[exKey] ? "✓" : "○"}</span>
+          </div>
+          ${setLogHtml}
+          ${rpeHtml}
+          <span class="desc-toggle" data-ex="${ex.name}">Show description &raquo;</span>
+          <div class="exercise-desc" data-ex="${ex.name}">
+            ${EXERCISES[ex.name] ? EXERCISES[ex.name].desc : "Perform with proper form: controlled negative, explosive positive. Full range of motion."}
+            ${EXERCISES[ex.name] && EXERCISES[ex.name].img
+              ? `<br><a href="${EXERCISES[ex.name].img}" target="_blank">View: ${EXERCISES[ex.name].imgLabel}</a>`
+              : ""}
+          </div>
+        `;
+        sec.appendChild(item);
+      });
+      card.appendChild(sec);
+    }
+
+    // Nutrition
+    if (day.nutrition) {
+      const sec = document.createElement("div");
+      sec.className = "section";
+      sec.innerHTML = `<div class="section-title">Nutrition — Bulking (${day.nutrition.macros.cals} cal/day)</div>`;
+      const macroRow = document.createElement("div");
+      macroRow.className = "macro-row";
+      macroRow.innerHTML = `
+        <span class="macro-pill">Protein <span class="val">${day.nutrition.macros.protein}g</span></span>
+        <span class="macro-pill">Carbs <span class="val">${day.nutrition.macros.carbs}g</span></span>
+        <span class="macro-pill">Fat <span class="val">${day.nutrition.macros.fat}g</span></span>
+        <span class="macro-pill">Calories <span class="val">${day.nutrition.macros.cals}</span></span>
+      `;
+      sec.appendChild(macroRow);
+
+      const mealList = document.createElement("ul");
+      mealList.className = "meal-list";
+
+      const dairyNote = document.createElement("div");
+      dairyNote.style.cssText = "font-size:0.78em;color:var(--orange);margin-bottom:8px;padding:4px 8px;background:var(--bg);border-radius:6px;";
+      dairyNote.innerHTML = "No dairy. Use whey isolate (low lactose) or plant protein. Use olive/coconut oil instead of butter. Nut-based milks instead of dairy.";
+      sec.appendChild(dairyNote);
+
+      day.nutrition.meals.forEach((meal, i) => {
+        const mealKey = makeId("meal", currentWeek, day.dayOfWeek, i);
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <span class="meal-check ${p.meals[mealKey] ? "checked" : ""}" data-key="${mealKey}" data-type="meal">${p.meals[mealKey] ? "✓" : "○"}</span>
+          <span class="meal-name"><strong>${meal.name}</strong>: ${meal.items}</span>
+          <span class="meal-cal">${meal.protein}g P / ~${meal.cal}cal</span>
+        `;
+        mealList.appendChild(li);
+      });
+
+      sec.appendChild(mealList);
+      card.appendChild(sec);
+    }
+
+    // Supplements
+    if (day.supplements.length > 0) {
+      const sec = document.createElement("div");
+      sec.className = "section";
+      sec.innerHTML = `<div class="section-title">Supplements</div>`;
+      day.supplements.forEach(s => {
+        const suppKey = makeId("supp", currentWeek, day.dayOfWeek, s.name.replace(/[^a-z0-9]/gi, "_"));
+        const div = document.createElement("div");
+        div.className = "supplement-item";
+        div.innerHTML = `
+          <span class="check ${p.supplements[suppKey] ? "checked" : ""}" data-key="${suppKey}" data-type="supplement">${p.supplements[suppKey] ? "✓" : "○"}</span>
+          <span><strong>${s.name}</strong> — ${s.dose}</span>
+        `;
+        sec.appendChild(div);
+      });
+
+      if (day.type === "workout") {
+        const note = document.createElement("div");
+        note.style.cssText = "font-size:0.78em;color:var(--text-dim);margin-top:6px;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border);";
+        note.innerHTML = "Take creatine with post-workout meal (protein + carbs). No need to cycle — 5g daily.";
+        sec.appendChild(note);
+      }
+      card.appendChild(sec);
+    }
+
+    content.appendChild(card);
+  }
+
+  updateStats(p);
+  attachListeners();
+}
+
+// ===== SET & RPE HANDLERS =====
+
+function handleSetInput(input) {
+  const p = getStorage();
+  const setKey = input.dataset.setkey;
+  const field = input.dataset.field;
+  if (!p.sets) p.sets = {};
+  if (!p.sets[setKey]) p.sets[setKey] = {};
+  const val = input.value.trim();
+  p.sets[setKey][field] = val ? parseFloat(val) : "";
+  saveProgress(p);
+}
+
+function handleRpe(rpeKey, value, el) {
+  const p = getStorage();
+  if (!p.rpe) p.rpe = {};
+  // Toggle: if same value clicked, deselect
+  if (p.rpe[rpeKey] === value) {
+    delete p.rpe[rpeKey];
+  } else {
+    p.rpe[rpeKey] = value;
+  }
+  saveProgress(p);
+  // Update visual immediately
+  const parent = el.parentElement;
+  parent.querySelectorAll(".rpe-dot").forEach(d => d.classList.remove("selected"));
+  if (p.rpe[rpeKey]) {
+    parent.querySelector(`.rpe-dot.${p.rpe[rpeKey]}`).classList.add("selected");
+  }
+}
+
+// ===== STATS =====
+
+function updateStats(p) {
+  const allKeys = new Set();
+
+  for (let w = 1; w <= 12; w++) {
+    const week = getWeekData(w, p.bw || USER_BW);
+    for (const day of week.days) {
+      allKeys.add(makeId("day", w, day.dayOfWeek));
+      for (const ex of day.exercises) {
+        allKeys.add(makeId("ex", w, day.dayOfWeek, ex.name.replace(/[^a-z0-9]/gi, "_")));
+      }
+      if (day.nutrition) {
+        day.nutrition.meals.forEach((_, i) => {
+          allKeys.add(makeId("meal", w, day.dayOfWeek, i));
+        });
+      }
+      day.supplements.forEach(s => {
+        allKeys.add(makeId("supp", w, day.dayOfWeek, s.name.replace(/[^a-z0-9]/gi, "_")));
+      });
+    }
+  }
+
+  let doneCount = 0;
+  for (const key of allKeys) {
+    if (p.exercises[key] || p.meals[key] || p.supplements[key] || p.days[key]) {
+      doneCount++;
+    }
+  }
+
+  const pct = allKeys.size > 0 ? Math.round(doneCount / allKeys.size * 100) : 0;
+  document.getElementById("statPct").textContent = pct + "%";
+  document.getElementById("statDays").textContent = doneCount + "/" + allKeys.size;
+
+  let streak = 0;
+  for (let w = 1; w <= 12; w++) {
+    let allDaysDone = true;
+    for (let d = 0; d < 7; d++) {
+      if (!p.days[makeId("day", w, d)]) { allDaysDone = false; break; }
+    }
+    if (allDaysDone) streak++; else break;
+  }
+  document.getElementById("statStreak").textContent = streak;
+}
+
+// ===== EVENT LISTENERS =====
+
+function attachListeners() {
+  document.querySelectorAll("[data-type]").forEach(el => {
+    el.removeEventListener("click", handleCheck);
+    el.addEventListener("click", handleCheck);
+  });
+
+  document.querySelectorAll(".desc-toggle").forEach(el => {
+    el.removeEventListener("click", handleDescToggle);
+    el.addEventListener("click", handleDescToggle);
+  });
+}
+
+function handleCheck(e) {
+  const el = e.currentTarget;
+  const key = el.dataset.key;
+  const type = el.dataset.type;
+  const p = getStorage();
+
+  let target;
+  if (type === "exercise") target = p.exercises;
+  else if (type === "meal") target = p.meals;
+  else if (type === "supplement") target = p.supplements;
+  else target = p.days;
+
+  target[key] = !target[key];
+  saveProgress(p);
+
+  el.classList.toggle("checked");
+  el.textContent = target[key] ? "✓" : "○";
+
+  if (type === "day") {
+    const card = el.closest(".day-card");
+    if (card) card.classList.toggle("completed-day");
+  }
+
+  updateStats(p);
+}
+
+function handleDescToggle(e) {
+  const exName = e.currentTarget.dataset.ex;
+  const desc = document.querySelector(`.exercise-desc[data-ex="${CSS.escape(exName)}"]`);
+  if (desc) {
+    desc.classList.toggle("show");
+    e.currentTarget.innerHTML = desc.classList.contains("show") ? "Hide description &raquo;" : "Show description &raquo;";
+  }
+}
+
+// Image lightbox
+document.addEventListener("click", function(e) {
+  if (e.target.tagName === "A" && e.target.href && e.target.href.includes("images/")) {
+    e.preventDefault();
+    const overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:1000;display:flex;align-items:center;justify-content:center;cursor:pointer;";
+    const img = document.createElement("img");
+    img.src = e.target.href;
+    img.style.cssText = "max-width:95%;max-height:95%;border-radius:8px;";
+    overlay.appendChild(img);
+    overlay.onclick = () => overlay.remove();
+    document.body.appendChild(overlay);
+  }
+});
+
+render();
+</script>
+</body>
+</html>
