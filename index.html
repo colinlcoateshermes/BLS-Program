@@ -243,6 +243,7 @@
   </div>
 
   <div class="io-bar">
+    <button class="io-btn" onclick="togglePhase()" id="phaseToggle" style="border-color:var(--accent);color:#fff;font-weight:600;background:var(--accent);">Switch to Bulking</button>
     <button class="io-btn" onclick="exportData()">Download Save</button>
     <button class="io-btn" onclick="document.getElementById('importInput').click()">Restore Save</button>
     <input type="file" id="importInput" accept=".json" onchange="importData(event)">
@@ -258,7 +259,7 @@
 <script>
 // ===== DATA =====
 
-const USER_BW = 180; // default bodyweight lbs — adjust in localStorage
+const USER_BW = 209; // 95kg — default bodyweight lbs
 
 function calcBulking(bw) {
   return {
@@ -266,6 +267,15 @@ function calcBulking(bw) {
     carbs: Math.round(bw * 2),
     fat: Math.round(bw * 0.4),
     cals: Math.round(bw * 1 * 4 + bw * 2 * 4 + bw * 0.4 * 9)
+  };
+}
+
+function calcCutting(bw) {
+  return {
+    protein: Math.round(bw * 1.2),
+    carbs: Math.round(bw * 1),
+    fat: Math.round(bw * 0.2),
+    cals: Math.round(bw * 1.2 * 4 + bw * 1 * 4 + bw * 0.2 * 9)
   };
 }
 
@@ -449,8 +459,9 @@ const SUPPLEMENTS_REST = [
   { name: "Multivitamin", dose: "1 serving daily" }
 ];
 
-function genMealTemplate(bw, isWorkoutDay) {
-  const m = calcBulking(bw);
+function genMealTemplate(bw, isWorkoutDay, phase) {
+  const calc = phase === "bulking" ? calcBulking : calcCutting;
+  const m = calc(bw);
   return {
     macros: m,
     meals: [
@@ -469,13 +480,13 @@ function isRestDay(dayOfWeek) {
   return dayOfWeek === 1; // Tuesday
 }
 
-function getWeekData(weekNum, bw) {
+function getWeekData(weekNum, bw, phase) {
   const days = [];
   const isPhase2 = weekNum > 8;
 
   for (let d = 0; d < 7; d++) {
     if (isRestDay(d)) {
-      const nut = genMealTemplate(bw, false);
+      const nut = genMealTemplate(bw, false, phase);
       days.push({
         dayName: DAY_NAMES[d],
         dayOfWeek: d,
@@ -488,7 +499,7 @@ function getWeekData(weekNum, bw) {
       continue;
     }
 
-    const nut = genMealTemplate(bw, true);
+    const nut = genMealTemplate(bw, true, phase);
     let exercises = [];
     let title = "";
 
@@ -563,7 +574,7 @@ function getWeekData(weekNum, bw) {
         type: "rest",
         title: "Rest / Active Recovery",
         exercises: [],
-        nutrition: genMealTemplate(bw, false),
+        nutrition: genMealTemplate(bw, false, phase),
         supplements: SUPPLEMENTS_REST
       });
     } else {
@@ -602,7 +613,16 @@ function getStorage() {
   if (!p.sets) p.sets = {};
   if (!p.rpe) p.rpe = {};
   if (!p.bw) p.bw = USER_BW;
+  if (!p.phase) p.phase = "cutting";
   return p;
+}
+
+function togglePhase() {
+  const p = getStorage();
+  p.phase = p.phase === "cutting" ? "bulking" : "cutting";
+  saveProgress(p);
+  showToast("Switched to " + (p.phase === "cutting" ? "Cutting" : "Bulking") + " macros");
+  render();
 }
 
 // ===== IMPORT / EXPORT =====
@@ -661,6 +681,7 @@ function makeId(prefix, ...parts) {
 function render() {
   const p = getStorage();
   const bw = p.bw || USER_BW;
+  const phase = p.phase || "cutting";
 
   // Week nav
   const nav = document.getElementById("weekNav");
@@ -682,7 +703,14 @@ function render() {
   const content = document.getElementById("weekContent");
   content.innerHTML = "";
 
-  const week = getWeekData(currentWeek, bw);
+  const week = getWeekData(currentWeek, bw, phase);
+
+  // Update phase toggle button text
+  const phaseBtn = document.getElementById("phaseToggle");
+  if (phaseBtn) {
+    const opposite = phase === "cutting" ? "Bulking" : "Cutting";
+    phaseBtn.textContent = "Switch to " + opposite;
+  }
 
   const phaseLabel = document.createElement("div");
   phaseLabel.style.cssText = "text-align:center;margin-bottom:12px;font-size:0.85em;color:var(--text-dim);padding:8px;background:var(--card);border-radius:8px;border:1px solid var(--border);";
@@ -798,7 +826,8 @@ function render() {
     if (day.nutrition) {
       const sec = document.createElement("div");
       sec.className = "section";
-      sec.innerHTML = `<div class="section-title">Nutrition — Bulking (${day.nutrition.macros.cals} cal/day)</div>`;
+      const phaseLabel = (p.phase || "cutting") === "cutting" ? "Cutting" : "Bulking";
+      sec.innerHTML = `<div class="section-title">Nutrition — ${phaseLabel} (${day.nutrition.macros.cals} cal/day)</div>`;
       const macroRow = document.createElement("div");
       macroRow.className = "macro-row";
       macroRow.innerHTML = `
@@ -899,9 +928,10 @@ function handleRpe(rpeKey, value, el) {
 
 function updateStats(p) {
   const allKeys = new Set();
+  const phase = p.phase || "cutting";
 
   for (let w = 1; w <= 12; w++) {
-    const week = getWeekData(w, p.bw || USER_BW);
+    const week = getWeekData(w, p.bw || USER_BW, phase);
     for (const day of week.days) {
       allKeys.add(makeId("day", w, day.dayOfWeek));
       for (const ex of day.exercises) {

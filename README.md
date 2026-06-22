@@ -51,7 +51,7 @@ Open `index.html` directly in your browser. localStorage persistence still works
 ### Each Day Shows
 
 - **Exercises** with sets, reps, rest times, and warm-up protocols
-- **Nutrition** with dairy-free meal template and macronutrient targets (bulking: 1g protein, 2g carbs, 0.4g fat per lb bodyweight)
+- **Nutrition** with dairy-free meal template and macronutrient targets (cutting: 1.2g protein, 1g carbs, 0.2g fat per lb bodyweight)
 - **Supplements** checklist
 
 ### Features
@@ -65,12 +65,17 @@ Open `index.html` directly in your browser. localStorage persistence still works
 
 ### Nutrition Notes
 
-This program uses **bulking macros** by default:
-- **Protein**: 1g per lb of bodyweight
-- **Carbs**: 2g per lb of bodyweight
-- **Fat**: 0.4g per lb of bodyweight
+This program uses **cutting macros** by default:
+- **Protein**: 1.2g per lb of bodyweight
+- **Carbs**: 1g per lb of bodyweight
+- **Fat**: 0.2g per lb of bodyweight
+
+You can switch to **bulking macros** at any time using the toggle button in the app header.
+Bulking targets: 1g protein, 2g carbs, 0.4g fat per lb.
 
 **No dairy**: All meal templates are dairy-free. Use whey protein isolate (low lactose), plant-based proteins, nut milks, and coconut/olive oil instead of butter.
+
+**Default bodyweight**: 95kg (209 lbs).
 
 To adjust bodyweight, open browser DevTools and run:
 ```js
@@ -80,14 +85,16 @@ localStorage.setItem("bls_progress", JSON.stringify(p));
 location.reload();
 ```
 
-Or simply edit the `USER_BW = 180` variable at the top of the `<script>` section in `index.html`.
+Or simply edit the `USER_BW = 209` variable at the top of the `<script>` section in `index.html`.
 
-### If You're Cutting Instead
+### If You're Bulking Instead
 
 Replace macros with:
-- **Protein**: 1.2g per lb bodyweight
-- **Carbs**: 1g per lb bodyweight
-- **Fat**: 0.2g per lb bodyweight
+- **Protein**: 1g per lb bodyweight
+- **Carbs**: 2g per lb bodyweight
+- **Fat**: 0.4g per lb bodyweight
+
+Or just use the **Switch to Bulking** button in the app header.
 
 ### Cardio
 
