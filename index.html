@@ -200,6 +200,56 @@
   .supplement-item .check { cursor: pointer; color: var(--text-dim); flex-shrink: 0; }
   .supplement-item .check.checked { color: var(--green); }
 
+  /* Supplements Guide Modal */
+  .guide-overlay {
+    display: none; position: fixed; inset: 0; z-index: 998;
+    background: rgba(0,0,0,0.7);
+  }
+  .guide-overlay.show { display: block; }
+  .guide-panel {
+    position: fixed; top: 0; right: -100%; width: 100%; max-width: 480px;
+    height: 100%; z-index: 999; overflow-y: auto;
+    background: var(--bg); transition: right 0.3s ease;
+    border-left: 1px solid var(--border);
+  }
+  .guide-panel.show { right: 0; }
+  .guide-header {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--card); border-bottom: 1px solid var(--border);
+    padding: 16px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .guide-header h2 { font-size: 1.1em; color: #fff; margin: 0; }
+  .guide-close {
+    font-size: 1.5em; cursor: pointer; color: var(--text-dim); line-height: 1;
+    background: none; border: none; padding: 4px 8px;
+  }
+  .guide-close:hover { color: var(--text); }
+  .guide-body { padding: 12px 16px 24px; }
+  .guide-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; margin-bottom: 12px;
+  }
+  .guide-card h3 { font-size: 1em; color: #fff; margin-bottom: 4px; }
+  .guide-card .guide-category {
+    font-size: 0.75em; color: var(--accent); text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 8px;
+  }
+  .guide-card .guide-section-title {
+    font-size: 0.8em; color: var(--text-dim); font-weight: 700;
+    margin-top: 8px; margin-bottom: 2px;
+  }
+  .guide-card p { font-size: 0.85em; color: var(--text); line-height: 1.6; margin-bottom: 4px; }
+  .guide-card .guide-note {
+    font-size: 0.78em; color: var(--orange); margin-top: 6px;
+    padding: 6px 10px; background: var(--bg); border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .guide-card .dose-badge {
+    display: inline-block; font-size: 0.8em; color: var(--green);
+    background: var(--bg); border: 1px solid var(--green); border-radius: 6px;
+    padding: 2px 8px; margin-bottom: 6px;
+  }
+
   /* Reset button */
   .reset-btn {
     display: block; width: 100%; padding: 12px;
@@ -246,6 +296,7 @@
     <button class="io-btn" onclick="togglePhase()" id="phaseToggle" style="border-color:var(--accent);color:#fff;font-weight:600;background:var(--accent);">Switch to Bulking</button>
     <button class="io-btn" onclick="exportData()">Download Save</button>
     <button class="io-btn" onclick="document.getElementById('importInput').click()">Restore Save</button>
+    <button class="io-btn" onclick="showSupplementsGuide()">Supplements Guide</button>
     <input type="file" id="importInput" accept=".json" onchange="importData(event)">
   </div>
 
@@ -255,6 +306,16 @@
   <button class="reset-btn" onclick="if(confirm('Reset ALL progress?')){localStorage.clear();location.reload()}">Reset All Progress</button>
 </div>
 <div class="toast" id="toast"></div>
+
+<!-- Supplements Guide Modal -->
+<div class="guide-overlay" id="guideOverlay" onclick="closeSupplementsGuide()"></div>
+<div class="guide-panel" id="guidePanel">
+  <div class="guide-header">
+    <h2>Supplements Guide</h2>
+    <button class="guide-close" onclick="closeSupplementsGuide()">&times;</button>
+  </div>
+  <div class="guide-body" id="guideBody"></div>
+</div>
 
 <script>
 // ===== DATA =====
@@ -457,6 +518,73 @@ const SUPPLEMENTS_REST = [
   { name: "Vitamin D3", dose: "2000-5000 IU daily" },
   { name: "Fish oil", dose: "2-3g EPA/DHA daily" },
   { name: "Multivitamin", dose: "1 serving daily" }
+];
+
+// Detailed supplement guide — rendered in modal
+const SUPPLEMENTS_GUIDE = [
+  {
+    name: "Whey Protein",
+    category: "Essential (Workout Days)",
+    dose: "30-40g pre-workout + 30-40g post-workout",
+    what: "A fast-digesting complete protein derived from milk. Rich in all essential amino acids with a particularly high leucine content — the key amino acid that triggers muscle protein synthesis.",
+    mechanism: "After training, your body shifts into a catabolic state. Whey protein delivers amino acids to the bloodstream within 20-30 minutes, spiking leucine levels to maximally stimulate mTOR — the cellular pathway that governs muscle repair and growth. This speeds recovery and provides the raw materials for hypertrophy.",
+    timing: "30-40g —30-60 minutes before training to prevent muscle breakdown during the workout. Another 30-40g within 30-60 minutes after training (the post-workout \"anabolic window\") when muscles are most receptive to nutrients.",
+    note: "You avoid dairy — standard whey concentrate contains ~5% lactose. Use **whey isolate** (≤0.5% lactose, higher protein % by weight) or **hydrolysed whey** (predigested for faster absorption). Plant alternatives: pea/rice protein blends with added leucine."
+  },
+  {
+    name: "Creatine Monohydrate",
+    category: "Essential (Workout Days)",
+    dose: "5g daily, post-workout with a meal",
+    what: "The most extensively researched sports supplement in history. Creatine is a naturally occurring compound produced by the body (liver, kidneys, pancreas) and found in red meat and fish.",
+    mechanism: "Your muscles store creatine as phosphocreatine, which rapidly donates phosphate groups to ADP to regenerate ATP — your body's primary energy currency. Each extra rep on heavy sets (4-6 rep range — your BLS foundation work) is an extra growth stimulus. Creatine also increases intracellular water, cell volumization, and may enhance satellite cell activity for long-term muscle growth.",
+    timing: "5g daily — take after your workout with a carb-containing meal (insulin spike improves uptake). No loading phase needed: 5g/day saturates muscles in 3-4 weeks. No cycling needed either — take it year-round.",
+    note: "Expect ~1-3kg of water weight gain in the first 3-4 weeks — this is intramuscular (inside muscle cells, not fat). It's a sign it's working. Choose micronised creatine monohydrate (dissolves better, less stomach upset) — it's the gold standard, no need for expensive \"buffered\" or \"salt-free\" versions."
+  },
+  {
+    name: "Vitamin D3",
+    category: "Everyday",
+    dose: "2000-5000 IU daily with a fat-containing meal",
+    what: "A fat-soluble vitamin that functions more like a hormone than a vitamin. Most people living in northern latitudes or working indoors are deficient.",
+    mechanism: "Vitamin D acts on vitamin D receptors found in nearly every cell, including muscle tissue and testes. It's directly involved in testosterone synthesis, calcium absorption (bone density for heavy lifting), immune function (fewer sick days = more training days), and mood regulation. Adequate vitamin D levels correlate with higher strength gains and lower injury risk.",
+    timing: "Take with your largest meal containing fat (e.g. lunch or dinner) for optimal absorption. If you get significant unprotected sun exposure (20+ mins midday), you can reduce supplementation. In winter or if you work indoors 5 days/week, stay at the higher end (3000-5000 IU).",
+    note: "Consider getting a blood test (25-hydroxyvitamin D) to dial in your exact dose. Vitamin D is oil-soluble and stored long-term, so mega-dosing (10,000+ IU/day) without medical supervision is not advised."
+  },
+  {
+    name: "Fish Oil (EPA & DHA)",
+    category: "Everyday",
+    dose: "2-3g combined EPA/DHA daily with food",
+    what: "Long-chain omega-3 fatty acids — eicosapentaenoic acid (EPA) and docosahexaenoic acid (DHA). The most bioavailable form comes from cold-water fatty fish (salmon, mackerel, sardines).",
+    mechanism: "Intense weight training creates micro-damage in muscle fibres and a systemic inflammatory response. EPA and DHA get incorporated into cell membranes and produce anti-inflammatory signalling molecules (resolvins, protectins). This reduces delayed-onset muscle soreness (DOMS), supports joint health (especially important for heavy squats/deadlifts), improves insulin sensitivity, and supports cardiovascular health.",
+    timing: "Split across meals (e.g. 1g with breakfast, 1g with dinner). Take with food containing fat for absorption. Fish oil can cause mild blood thinning — if you're on blood thinners or have surgery scheduled, consult your doctor.",
+    note: "Look for molecularly distilled oil (heavy-metal free, no PCB contaminants) with at least 500mg EPA + 250mg DHA per capsule. \"Pharmaceutical grade\" is marketing — read the label. Store in the fridge to prevent rancidity. Vegetarian option: algal oil (DHA only, EPA must come from conversion)."
+  },
+  {
+    name: "Multivitamin",
+    category: "Everyday",
+    dose: "1 serving daily with food",
+    what: "A broad-spectrum blend of vitamins and minerals covering the full micronutrient spectrum. Not a replacement for whole foods, but a safety net.",
+    mechanism: "Every metabolic pathway in the body depends on micronutrients — B vitamins for energy metabolism, zinc and magnesium for testosterone production and sleep quality, selenium for thyroid function, iron for oxygen transport. On a restricted diet (cutting) or a repetitive meal plan, even with whole foods, you can develop subclinical deficiencies that blunt recovery and performance.",
+    timing: "Take with your largest meal. Avoid taking on an empty stomach — fat-soluble vitamins (A, D, E, K) need dietary fat for absorption, and water-soluble B vitamins can cause nausea on an empty stomach.",
+    note: "Choose one with bioavailable forms: methylated B vitamins (methylfolate, methylcobalamin), chelated minerals (zinc picolinate, magnesium glycinate), and adequate vitamin D (at least 2000 IU — many multi's only have 400 IU). Avoid brands with excessive iron if you're a man getting enough from diet (iron overload is a real concern)."
+  },
+  {
+    name: "Casein Protein",
+    category: "Optional (Nice-to-Have)",
+    dose: "30-40g before bed",
+    what: "The other major milk protein (80% of milk protein vs 20% whey). Casein clots in the acidic environment of the stomach, releasing amino acids slowly over 6-8 hours.",
+    mechanism: "While you sleep, you're in an 8-hour fast. Without a slow-release protein source, your body may shift toward muscle breakdown for amino acids. Casein provides a steady, low-level trickle of amino acids throughout the night, keeping you in a net positive protein balance. This is especially valuable during cutting (restricted calories make muscle preservation harder).",
+    timing: "30-40g immediately before bed. Mix with water or unsweetened almond/oat milk. Do take it every night, not just training days — recovery happens 24/7.",
+    note: "Also dairy-based — same rules as whey: use isolate or look for plant alternatives. Soy protein isolate has similar slow-digesting properties. If your total daily protein is already adequate (1g/lb bodyweight), casein is optional — total daily protein matters more than timing."
+  },
+  {
+    name: "Pre-Workout (Caffeine)",
+    category: "Optional (Nice-to-Have)",
+    dose: "200-400mg caffeine 30-45 min before training",
+    what: "Caffeine is the most widely used ergogenic aid. It's a central nervous system stimulant that blocks adenosine receptors, reducing perceived effort and fatigue.",
+    mechanism: "Adenosine builds up during the day and makes you feel tired. Caffeine is structurally similar and binds to adenosine receptors without activating them — effectively turning off the 'I'm tired' signal. This allows you to train with more focus, push past mental barriers on heavy sets, and maintain higher rep quality late in the session. A good black coffee or pre-workout formula can add 1-3 reps to your working sets.",
+    timing: "200-400mg caffeine 30-45 minutes before your workout. 1 cup of coffee (~100mg), 2 cups hits 200mg. If using a pre-workout formula, follow label dosing — many contain 200-350mg per scoop plus other ingredients (beta-alanine, citrulline malate) that reduce fatigue and improve pumps.",
+    note: "If you train in the evening, caffeine can disrupt sleep. Limit to morning/afternoon sessions, or use a low/no-stim pre-workout. Tolerance builds — if 200mg stops working, take a 1-2 week tolerance break rather than increasing dose. Avoid high-stim pre-workouts if you have heart conditions or anxiety."
+  }
 ];
 
 function genMealTemplate(bw, isWorkoutDay, phase) {
@@ -668,6 +796,39 @@ function showToast(msg, isError) {
   t.style.color = isError ? "var(--red)" : "var(--green)";
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// ===== SUPPLEMENTS GUIDE =====
+
+function showSupplementsGuide() {
+  const panel = document.getElementById("guidePanel");
+  const overlay = document.getElementById("guideOverlay");
+  const body = document.getElementById("guideBody");
+
+  body.innerHTML = SUPPLEMENTS_GUIDE.map(s => `
+    <div class="guide-card">
+      <div class="guide-category">${s.category}</div>
+      <h3>${s.name}</h3>
+      <span class="dose-badge">${s.dose}</span>
+      <div class="guide-section-title">What it is</div>
+      <p>${s.what}</p>
+      <div class="guide-section-title">How it works</div>
+      <p>${s.mechanism}</p>
+      <div class="guide-section-title">When & how to take it</div>
+      <p>${s.timing}</p>
+      <div class="guide-note">${s.note}</div>
+    </div>
+  `).join("");
+
+  panel.classList.add("show");
+  overlay.classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+
+function closeSupplementsGuide() {
+  document.getElementById("guidePanel").classList.remove("show");
+  document.getElementById("guideOverlay").classList.remove("show");
+  document.body.style.overflow = "";
 }
 
 // ===== RENDER =====
