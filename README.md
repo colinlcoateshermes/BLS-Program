@@ -1,4 +1,4 @@
-# Bigger Leaner Stronger 4.0 — 20-Week Cut & Bulk Program
+# Bigger Leaner Stronger 4.0 — 54-Week Annual Program
 
 A mobile-friendly, day-by-day workout tracker based on Michael Matthews' *Bigger Leaner Stronger 4.0* (Fourth Edition).
 
@@ -17,16 +17,18 @@ Open `index.html` directly in your browser. localStorage persistence still works
 
 ## Program Structure
 
-### 20 Weeks — 4 Phases (each 5 weeks: 4 training + 1 deload)
+### 54 Weeks — 6 Phases (each 9 weeks: 8 training + 1 deload)
 
 | Phase | Weeks | Goal | Emphasis |
 |-------|-------|------|----------|
-| **Phase 1** | 1-5 (Cut) | Foundation | Bench Press, Deadlift, Dumbbell Press, Chin-ups |
-| **Phase 2** | 6-10 (Cut) | Rotation | Incline Bench, Rows, OHP, Dips, Bulgarian Split Squats |
-| **Phase 3** | 11-15 (Bulk) | Strength | Dumbbell Bench, Rows, Standing OHP, Chin-ups |
-| **Phase 4** | 16-20 (Bulk) | Intensity | Arnold Press, Front Squats, Machine Reverse Fly, Split Squats |
+| **Phase 1** | 1-9 (Cut) | Foundation | Bench Press, Deadlift, Dumbbell Press, Chin-ups |
+| **Phase 2** | 10-18 (Cut) | Rotation | Incline Bench, Rows, OHP, Dips, Bulgarian Split Squats |
+| **Phase 3** | 19-27 (Bulk) | Strength | Standing OHP, Barbell Row, Chin-ups |
+| **Phase 4** | 28-36 (Bulk) | Intensity | Arnold Press, Front Squats, Machine Reverse Fly, Split Squats |
+| **Phase 5** | 37-45 (Bulk) | Foundation Return | Same rotation as Phase 1 — Bench/Deadlift focus |
+| **Phase 6** | 46-54 (Bulk) | Rotation Return | Same rotation as Phase 2 — Front Squats, Dips, Pull-ups |
 
-Weeks 5, 10, 15, 20 are **deload weeks** — 2 sets of 2 reps on compounds, 2 sets of 4 on accessories.
+Weeks 9, 18, 27, 36, 45, 54 are **deload weeks** — 2 sets of 2 reps on compounds, 2 sets of 4 on accessories.
 
 ### Weekly Schedule (BLS 4.0 5-Day Routine)
 
@@ -62,12 +64,12 @@ All meal plans are **100% dairy-free**:
 
 ## Meal Plans
 
-The app automatically serves the correct meal plan based on the current week:
+The app automatically serves the correct meal plan based on the current phase:
 
 | Phase | Meal Plan | Macros |
 |-------|-----------|--------|
-| **Cut (Weeks 1-10)** | Official BLS 4.0 210lb Cut (dairy-free, soy milk) | 2,305 cal — 233P / 236C / 52F (5 meals) |
-| **Bulk (Weeks 11-20)** | Official BLS 4.0 210lb Lean Gain (dairy-free, soy milk) | 3,351 cal — 210P / 470C / 77F (6 meals) |
+| **Cut (Phases 1-2, Wks 1-18)** | Official BLS 4.0 210lb Cut (dairy-free, soy milk) | 2,305 cal — 233P / 236C / 52F (5 meals) |
+| **Bulk (Phases 3-6, Wks 19-54)** | Official BLS 4.0 210lb Lean Gain (dairy-free, soy milk) | 3,351 cal — 210P / 470C / 77F (6 meals) |
 
 ### Cut Meals (2,305 cal) — Morning Workout Schedule
 1. **Pre-Workout**: Whey isolate, creatine, pre-workout (caffeine)
@@ -115,7 +117,7 @@ Vitamin D3 is covered by the multivitamin — no standalone supplement needed.
 - **RPE traffic light** — rate each exercise as Easy / OK / Hard.
 - **Image viewer** — tapping a screenshot link opens it full-screen. Tap again to close.
 - **Progress stats** — completion percentage, total checkmarks, and weekly streak counter.
-- **Week navigation** — jump between weeks. Deload weeks are highlighted in orange.
+- **Week navigation** — 54 week buttons. Deload weeks are highlighted in orange.
 - **Reset** — use the red reset button at the bottom to clear all progress.
 - **Import/Export** — download and restore your progress as JSON files.
 
@@ -123,11 +125,15 @@ Vitamin D3 is covered by the multivitamin — no standalone supplement needed.
 
 Each phase rotates exercises to prevent adaptation and target muscles from different angles:
 
-**Push (Mon)**: Phase 1 — Barbell Bench, Incline Bench, DB Bench, Triceps Pushdown → Phase 2 — Incline Bench, DB Bench, Incline DB Bench, Skullcrushers → Phase 3 — DB Bench, Incline Bench, Barbell Bench, Triceps Pushdown → Phase 4 — Incline DB Bench, Barbell Bench, Incline Bench, Skullcrushers
+**Push (Mon)**: Phase 1 — Barbell Bench, Incline Bench, DB Bench, Triceps Pushdown → Phase 2 — Incline Bench, DB Bench, Incline DB Bench, Skullcrushers → Phase 3 — DB Bench, Incline Bench, Barbell Bench, Triceps Pushdown → Phase 4 — Incline DB Bench, Barbell Bench, Incline Bench, Skullcrushers → Phase 5 — Barbell Bench, Incline Bench, DB Bench, Triceps Pushdown (Phase 1 return) → Phase 6 — Incline Bench, DB Bench, Incline DB Bench, Skullcrushers (Phase 2 return)
 
-**Legs (Fri)**: Phase 1 — Squat, Leg Curl, Leg Press, DB Lunges → Phase 2 — Squat, RDL, Front Squat, Bulgarian Split Squats → Phase 3 — Same as Phase 1 → Phase 4 — Squat, RDL, Front Squat, Bulgarian Split Squats
+**Pull (Wed)**: Phase 1 — Deadlift, One-Arm DB Row, Lat Pulldown (Medium), Alt DB Curl → Phase 2 — Deadlift, Cable Row (Wide), Lat Pulldown (Close), Hammer Curl → Phase 3 — Deadlift, Barbell Row, Lat Pulldown (Medium), Alt DB Curl → Phase 4 — Deadlift, One-Arm DB Row, Lat Pulldown (Close), Hammer Curl → Phase 5 — Deadlift, Cable Row (Close-Grip), Lat Pulldown (Medium), Alt DB Curl → Phase 6 — Deadlift, Barbell Row, Lat Pulldown (Close), Hammer Curl
 
-**Upper Body A (Thu)**: Phase 1 — Seated DB Press → Phase 2 — Seated Barbell OHP → Phase 3 — Standing Barbell OHP → Phase 4 — Arnold Press (new!)
+**Upper Body A (Thu)**: Phase 1 — Seated DB Press → Phase 2 — Seated Barbell OHP → Phase 3 — Standing Barbell OHP → Phase 4 — Arnold Press → Phase 5 — Seated Barbell OHP (Phase 1 return) → Phase 6 — Standing Barbell OHP (Phase 2 return)
+
+**Legs (Fri)**: Phase 1 — Squat, Leg Curl, Leg Press, DB Lunges → Phase 2 — Squat, RDL, Front Squat, Bulgarian Split Squats → Phase 3 — Squat, Leg Curl, Leg Press, DB Lunges (Phase 1 same) → Phase 4 — Squat, RDL, Front Squat, Bulgarian Split Squats (Phase 2 same) → Phase 5 — Phase 1 pattern → Phase 6 — Phase 2 pattern
+
+**Upper Body B (Sat)**: Phase 1 — Close-Grip Bench, Chin-ups, Cable Row (Close), Barbell Curl → Phase 2 — Dips, Pull-ups, One-Arm DB Row, EZ Bar Curl → Phase 3 — Close-Grip Bench, Chin-ups, Cable Row (Wide), Barbell Curl → Phase 4 — Dips, Pull-ups, Cable Row (Close), EZ Bar Curl → Phase 5 — Close-Grip Bench, Chin-ups, One-Arm DB Row, Barbell Curl → Phase 6 — Dips, Pull-ups, Cable Row (Wide), EZ Bar Curl
 
 ## File Structure
 
@@ -168,8 +174,8 @@ Core principles:
 - **4-6 rep range** for working sets at 80-85% of 1RM
 - **Compound lifts first**: Squat, Deadlift, Bench Press, Overhead Press
 - **Progressive overload**: Add weight or reps every session
-- **Exercise rotation**: Change primary exercises every phase (5 weeks)
-- **Deload weeks**: Every 5th week — reduce volume, maintain form
+- **Exercise rotation**: Change primary exercises every phase (9 weeks)
+- **Deload weeks**: Every 9th week — reduce volume, maintain form
 - **3 minutes rest** between heavy sets, 2 for accessory
 - **Proper warm-up**: 4 warm-up sets before first compound lift
 

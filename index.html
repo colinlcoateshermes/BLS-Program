@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>BLS 4.0 — 20-Week Cut &amp; Bulk</title>
+<title>BLS 4.0 — 54-Week Annual Program</title>
 <style>
   :root {
     --bg: #0d1117;
@@ -281,11 +281,11 @@
 <div class="container" id="app">
   <div class="header">
     <h1>Bigger Leaner Stronger 4.0</h1>
-    <div class="subtitle">20-Week Cut &amp; Bulk — Based on BLS 4.0 by Michael Matthews</div>
+    <div class="subtitle">54-Week Annual Program — Based on BLS 4.0 by Michael Matthews</div>
     <div class="phase-badge" id="headerPhaseBadge">Phase 1 — Cut</div>
     <div class="stats-bar">
       <div class="stat"><div class="num" id="statPct">0%</div><div class="label">Complete</div></div>
-      <div class="stat"><div class="num" id="statDays">0/100</div><div class="label">Workout Days</div></div>
+      <div class="stat"><div class="num" id="statDays">0/270</div><div class="label">Workout Days</div></div>
       <div class="stat"><div class="num" id="statStreak">0</div><div class="label">Week Streak</div></div>
     </div>
   </div>
@@ -315,14 +315,16 @@
 
 <script>
 // ===== PHASE & WEEK STRUCTURE =====
-// 4 phases × 5 weeks each (4 training + 1 deload) = 20 weeks
-// Cut = Phases 1-2 (weeks 1-10), Bulk = Phases 3-4 (weeks 11-20)
+// 6 phases × 9 weeks each (8 training + 1 deload) = 54 weeks
+// Cut = Phases 1-2 (weeks 1-18), Bulk = Phases 3-6 (weeks 19-54)
 
 const PHASES = [
-  { phase: 1, label: "Phase 1", trainingWeeks: [1,2,3,4], deloadWeek: 5 },
-  { phase: 2, label: "Phase 2", trainingWeeks: [6,7,8,9], deloadWeek: 10 },
-  { phase: 3, label: "Phase 3", trainingWeeks: [11,12,13,14], deloadWeek: 15 },
-  { phase: 4, label: "Phase 4", trainingWeeks: [16,17,18,19], deloadWeek: 20 }
+  { phase: 1, label: "Phase 1", trainingWeeks: [1,2,3,4,5,6,7,8], deloadWeek: 9 },
+  { phase: 2, label: "Phase 2", trainingWeeks: [10,11,12,13,14,15,16,17], deloadWeek: 18 },
+  { phase: 3, label: "Phase 3", trainingWeeks: [19,20,21,22,23,24,25,26], deloadWeek: 27 },
+  { phase: 4, label: "Phase 4", trainingWeeks: [28,29,30,31,32,33,34,35], deloadWeek: 36 },
+  { phase: 5, label: "Phase 5", trainingWeeks: [37,38,39,40,41,42,43,44], deloadWeek: 45 },
+  { phase: 6, label: "Phase 6", trainingWeeks: [46,47,48,49,50,51,52,53], deloadWeek: 54 }
 ];
 
 function getPhaseForWeek(w) {
@@ -334,7 +336,7 @@ function getPhaseForWeek(w) {
 }
 
 function getPhaseLabel(phaseNum) {
-  const labels = {1: "Phase 1 — Cut", 2: "Phase 2 — Cut", 3: "Phase 3 — Bulk", 4: "Phase 4 — Bulk"};
+  const labels = {1: "Phase 1 — Cut", 2: "Phase 2 — Cut", 3: "Phase 3 — Bulk", 4: "Phase 4 — Bulk", 5: "Phase 5 — Bulk", 6: "Phase 6 — Bulk"};
   return labels[phaseNum] || "Phase " + phaseNum;
 }
 
@@ -703,6 +705,72 @@ const PHASE_EXERCISES = {
       { name: "Seated Cable Row (Close-Grip)", numSets: 3, reps: "6-8", rest: "2 min" },
       { name: "E-Z Bar Curl", numSets: 3, reps: "6-8", rest: "2 min" }
     ]
+  },
+  // Phase 5: Phase 1 rotation return
+  5: {
+    0: [
+      { name: "Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+      { name: "Incline Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "Dumbbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "Triceps Pushdown", numSets: 3, reps: "6-8", rest: "2 min" }
+    ],
+    2: [
+      { name: "Barbell Deadlift", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+      { name: "Seated Cable Row (Close-Grip)", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "Lat Pulldown (Medium-Grip)", numSets: 3, reps: "6-8", rest: "2 min" },
+      { name: "Alternating Dumbbell Curl", numSets: 3, reps: "6-8", rest: "2 min" }
+    ],
+    3: [
+      { name: "Seated Barbell Overhead Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+      { name: "Dumbbell Side Lateral Raise", numSets: 3, reps: "6-8", rest: "2 min" },
+      { name: "Dumbbell Rear Lateral Raise", numSets: 3, reps: "6-8", rest: "2 min" },
+      { name: "Seated Triceps Press", numSets: 3, reps: "6-8", rest: "2 min" }
+    ],
+    5: [
+      { name: "Barbell Squat", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+      { name: "Leg Curl", numSets: 3, reps: "6-8", rest: "2 min" },
+      { name: "Leg Press", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "Dumbbell Lunge (Walking or In-Place)", numSets: 3, reps: "6-8", rest: "2 min" }
+    ],
+    6: [
+      { name: "Close-Grip Bench Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+      { name: "Chin-Up", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "One-Arm Dumbbell Row", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "Barbell Curl", numSets: 3, reps: "6-8", rest: "2 min" }
+    ]
+  },
+  // Phase 6: Phase 2 rotation return
+  6: {
+    0: [
+      { name: "Incline Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+      { name: "Dumbbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "Incline Dumbbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "Lying Triceps Extension (Skullcrusher)", numSets: 3, reps: "6-8", rest: "2 min" }
+    ],
+    2: [
+      { name: "Barbell Deadlift", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+      { name: "Barbell Row", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "Lat Pulldown (Close-Grip)", numSets: 3, reps: "6-8", rest: "2 min" },
+      { name: "Dumbbell Hammer Curl", numSets: 3, reps: "6-8", rest: "2 min" }
+    ],
+    3: [
+      { name: "Standing Barbell Overhead Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+      { name: "Barbell Rear Delt Row", numSets: 3, reps: "6-8", rest: "2 min" },
+      { name: "Dumbbell Side Lateral Raise", numSets: 3, reps: "6-8", rest: "2 min" },
+      { name: "Triceps Pushdown", numSets: 3, reps: "6-8", rest: "2 min" }
+    ],
+    5: [
+      { name: "Barbell Squat", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+      { name: "Romanian Deadlift", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "Barbell Front Squat", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "Dumbbell Bulgarian Split Squat", numSets: 3, reps: "6-8", rest: "2 min" }
+    ],
+    6: [
+      { name: "Dip", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+      { name: "Pull-Up", numSets: 3, reps: "4-6", rest: "3 min" },
+      { name: "Seated Cable Row (Wide-Grip)", numSets: 3, reps: "6-8", rest: "2 min" },
+      { name: "E-Z Bar Curl", numSets: 3, reps: "6-8", rest: "2 min" }
+    ]
   }
 };
 
@@ -865,7 +933,7 @@ function render() {
   // Week nav
   const nav = document.getElementById("weekNav");
   nav.innerHTML = "";
-  for (let w = 1; w <= 20; w++) {
+  for (let w = 1; w <= 54; w++) {
     const btn = document.createElement("button");
     const wp = getPhaseForWeek(w);
     btn.className = "week-btn" + (w === currentWeek ? " active" : "") + (wp && wp.isDeload ? " deload" : "");
@@ -893,7 +961,9 @@ function render() {
     1: "Phase 1 — Cut (4-6 rep range, Bench/Deadlift focus)",
     2: "Phase 2 — Cut (Exercise rotation, Front Squats + Bulgarian Split Squats)",
     3: "Phase 3 — Bulk (Standing OHP, Barbell Row return)",
-    4: "Phase 4 — Bulk (Arnold Press, Pull-ups, Hammer Curls)"
+    4: "Phase 4 — Bulk (Arnold Press, Pull-ups, Hammer Curls)",
+    5: "Phase 5 — Bulk (Phase 1 rotation return, Bench/Deadlift focus)",
+    6: "Phase 6 — Bulk (Phase 2 rotation return, accessories focus)"
   };
   const infoBar = document.createElement("div");
   infoBar.style.cssText = "text-align:center;margin-bottom:12px;font-size:0.85em;color:var(--text-dim);padding:8px;background:var(--card);border-radius:8px;border:1px solid var(--border);";
@@ -1060,9 +1130,9 @@ function updateStats() {
   const p = getStorage();
 
   // Count completed workout days (not rest days)
-  const totalWorkoutDays = 20 * 5; // 20 weeks × 5 workout days
+  const totalWorkoutDays = 54 * 5; // 54 weeks × 5 workout days
   let doneDays = 0;
-  for (let w = 1; w <= 20; w++) {
+  for (let w = 1; w <= 54; w++) {
     for (let d of [0, 2, 3, 5, 6]) { // Mon, Wed, Thu, Fri, Sat
       if (p.days[makeId("day", w, d)]) doneDays++;
     }
@@ -1070,14 +1140,14 @@ function updateStats() {
   document.getElementById("statDays").textContent = doneDays + "/" + totalWorkoutDays;
 
   // Percentage complete
-  const totalChecks = 20 * 7; // all day cards
+  const totalChecks = 54 * 7; // all day cards
   let doneChecks = Object.keys(p.days).length;
   const pct = Math.round(doneChecks / totalChecks * 100);
   document.getElementById("statPct").textContent = pct + "%";
 
   // Week Streak: consecutive completed weeks from week 1
   let streak = 0;
-  for (let w = 1; w <= 20; w++) {
+  for (let w = 1; w <= 54; w++) {
     let allDaysDone = true;
     for (let d = 0; d < 7; d++) {
       if (!p.days[makeId("day", w, d)]) { allDaysDone = false; break; }
