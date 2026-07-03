@@ -884,16 +884,18 @@ function getWeekData(weekNum) {
 
   for (let d = 0; d < 7; d++) {
     if (d === 1) { // Tuesday rest
+      const restPlan = phase <= 2 ? MEAL_CUT : MEAL_BULK;
       days.push({
         dayName: DAY_NAMES[d], dayOfWeek: d, type: "rest", title: "Rest Day",
-        exercises: [], plan: MEAL_CUT, phase: phase, isDeload: false
+        exercises: [], plan: restPlan, phase: phase, isDeload: false
       });
       continue;
     }
     if (d === 6) { // Sunday rest
+      const restPlan = phase <= 2 ? MEAL_CUT : MEAL_BULK;
       days.push({
         dayName: DAY_NAMES[d], dayOfWeek: d, type: "rest", title: "Rest / Active Recovery",
-        exercises: [], plan: MEAL_CUT, phase: phase, isDeload: false
+        exercises: [], plan: restPlan, phase: phase, isDeload: false
       });
       continue;
     }
