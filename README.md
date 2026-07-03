@@ -40,27 +40,65 @@ Weeks 5, 10, 15, 20 are **deload weeks** — 2 sets of 2 reps on compounds, 2 se
 | **Saturday** | **Upper Body B** — Close-grip bench + chins + rows + curls |
 | **Sunday** | **REST / Active Recovery** |
 
+### Morning Workout Routine
+
+All training sessions follow this morning schedule:
+
+1. **Pre-Workout Shake**: 1 scoop whey isolate + 5g creatine + pre-workout (caffeine)
+2. **WORKOUT** (60-75 min)
+3. **Post-Workout Breakfast**: Soy yogurt, whey, berries, granola (or bulk equivalent)
+
+The app's meal plans are ordered accordingly — Pre-Workout first, then Post-Workout Breakfast after the workout.
+
+### Dairy-Free Notes
+
+All meal plans are **100% dairy-free**:
+- Yogurt replaced with soy-based protein yogurt
+- Cow's milk replaced with **soy milk** throughout
+- Cheese removed from meals
+- Half-and-half replaced with black coffee or soy creamer
+- Whey isolate (≤0.5% lactose) retained as it's well-tolerated
+- Casein protein retained for the pre-bed shake (can substitute with soy protein isolate if needed)
+
 ## Meal Plans
 
 The app automatically serves the correct meal plan based on the current week:
 
 | Phase | Meal Plan | Macros |
 |-------|-----------|--------|
-| **Cut (Weeks 1-10)** | Official BLS 4.0 210lb Cut | 2,305 cal — 233P / 236C / 52F (4 meals) |
-| **Bulk (Weeks 11-20)** | Official BLS 4.0 210lb Lean Gain | 3,351 cal — 210P / 470C / 77F (5 meals) |
+| **Cut (Weeks 1-10)** | Official BLS 4.0 210lb Cut (dairy-free, soy milk) | 2,305 cal — 233P / 236C / 52F (5 meals) |
+| **Bulk (Weeks 11-20)** | Official BLS 4.0 210lb Lean Gain (dairy-free, soy milk) | 3,351 cal — 210P / 470C / 77F (6 meals) |
 
-### Cut Meals (2,305 cal)
-1. **Breakfast**: Greek yogurt, whey isolate, berries, granola
-2. **Lunch**: Shrimp, white rice, sweet corn, bell pepper
-3. **Snack**: Double whey shake, rice cakes, PBfit
-4. **Dinner**: Lean beef burger bun, cheese, chocolate
+### Cut Meals (2,305 cal) — Morning Workout Schedule
+1. **Pre-Workout**: Whey isolate, creatine, pre-workout (caffeine)
+2. **Post-Workout Breakfast**: Soy yogurt, whey isolate, berries, granola
+3. **Lunch**: Shrimp, white rice, sweet corn, bell pepper
+4. **Snack**: Double whey shake (soy milk), rice cakes, PBfit
+5. **Dinner**: Lean beef burger bun, tomato/lettuce
 
-### Bulk Meals (3,351 cal)
-1. **Breakfast**: Greek yogurt, mixed berries, granola
-2. **Lunch**: Chicken burrito bowl with tortilla, refried beans, avocado
-3. **Snack**: Whey shake, PB&J sandwiches
-4. **Dinner**: Sirloin steak, sweet potato, green beans
-5. **Pre-Bed**: Casein shake, banana
+### Bulk Meals (3,351 cal) — Morning Workout Schedule
+1. **Pre-Workout**: Whey isolate, creatine, pre-workout (caffeine)
+2. **Post-Workout Breakfast**: Soy yogurt, mixed berries, granola
+3. **Lunch**: Chicken burrito bowl (no cheese), avocado
+4. **Snack**: Whey shake (soy milk), PB&J sandwiches
+5. **Dinner**: Sirloin steak, sweet potato, green beans
+6. **Pre-Bed**: Casein shake (soy milk), banana
+
+## Supplements
+
+### Workout Days
+- **Pre-workout (caffeine)**: 200-400mg 30-45 min before training
+- **Whey protein**: 30-40g in pre-workout shake + 30-40g post-workout
+- **Creatine monohydrate**: 5g daily (in pre-workout shake)
+- **Fish oil**: 2-3g EPA/DHA daily
+- **Multivitamin**: 1 serving daily
+
+### Rest Days
+- **Creatine monohydrate**: 5g daily with a meal
+- **Fish oil**: 2-3g EPA/DHA daily
+- **Multivitamin**: 1 serving daily
+
+Vitamin D3 is covered by the multivitamin — no standalone supplement needed.
 
 ## Each Day Shows
 

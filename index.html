@@ -364,9 +364,14 @@ const CUT_MEALS = {
   macros: { cals: 2305, protein: 233, carbs: 236, fat: 52 },
   meals: [
     {
-      name: "Breakfast",
-      items: "250g Skyr/Greek yogurt (2%), 1 scoop whey isolate, 50g blueberries/75g strawberries, 25g granola, cinnamon/nutmeg, 2 tbsp half-and-half (coffee), 10g sugar (coffee)",
-      detail: "527 cal | 51P 50C 15F"
+      name: "Pre-Workout",
+      items: "1 scoop whey isolate, 5g creatine, 1 serving pre-workout (caffeine), water",
+      detail: "~130 cal | 25P 0C 0F"
+    },
+    {
+      name: "Post-Workout Breakfast",
+      items: "1 serving soy-based protein yogurt, 1 scoop whey isolate, 50g blueberries/75g strawberries, 25g granola, cinnamon/nutmeg, 10g sugar (coffee), black coffee or soy creamer",
+      detail: "~460 cal | 45P 45C 10F"
     },
     {
       name: "Lunch",
@@ -374,14 +379,14 @@ const CUT_MEALS = {
       detail: "522 cal | 62P 61C 5F"
     },
     {
-      name: "Snack (Pre/Post Workout)",
-      items: "2 scoops whey isolate, 1 cup skim milk, 2 rice cakes, 18g PBfit powder (mixed)",
+      name: "Snack",
+      items: "2 scoops whey isolate, 240ml soy milk, 2 rice cakes, 18g PBfit powder (mixed)",
       detail: "543 cal | 64P 55C 7F"
     },
     {
       name: "Dinner",
-      items: "1 seeded hamburger bun (74g), 200g 95% lean ground beef, 15g low-fat cheddar, 100g tomato/lettuce, 2 tbsp ketchup, hot sauce, 25g milk chocolate",
-      detail: "713 cal | 56P 69C 24F"
+      items: "1 seeded hamburger bun (74g), 200g 95% lean ground beef, 100g tomato/lettuce, 2 tbsp ketchup, hot sauce, 25g milk chocolate",
+      detail: "~670 cal | 54P 66C 22F"
     }
   ]
 };
@@ -390,18 +395,23 @@ const BULK_MEALS = {
   macros: { cals: 3351, protein: 210, carbs: 470, fat: 77 },
   meals: [
     {
-      name: "Breakfast",
-      items: "250g Skyr/Greek yogurt (2%), 220g mixed berries, 65g granola, cinnamon/nutmeg, 2 tbsp half-and-half, 10g sugar (coffee)",
-      detail: "682 cal | 34P 99C 19F"
+      name: "Pre-Workout",
+      items: "1 scoop whey isolate, 5g creatine, 1 serving pre-workout (caffeine), water",
+      detail: "~130 cal | 25P 0C 0F"
+    },
+    {
+      name: "Post-Workout Breakfast",
+      items: "1 serving soy-based protein yogurt, 220g mixed berries, 65g granola, cinnamon/nutmeg, 10g sugar (coffee), black coffee or soy creamer",
+      detail: "~620 cal | 30P 95C 15F"
     },
     {
       name: "Lunch",
-      items: "1 large flour tortilla (71g), 130g chicken breast, 150g refried beans, 30g dry brown rice, 30g low-fat cheddar, 100g tomato, 100g onion, 30g avocado, Sriracha",
-      detail: "822 cal | 53P 99C 25F"
+      items: "1 large flour tortilla (71g), 130g chicken breast, 150g refried beans, 30g dry brown rice, 100g tomato, 100g onion, 30g avocado, Sriracha",
+      detail: "~795 cal | 52P 97C 23F"
     },
     {
       name: "Snack",
-      items: "1 scoop whey isolate, 240ml rice milk, 2 slices whole-grain bread, 20g peanut butter, 45g jam",
+      items: "1 scoop whey isolate, 240ml soy milk, 2 slices whole-grain bread, 20g peanut butter, 45g jam",
       detail: "694 cal | 39P 97C 18F"
     },
     {
@@ -411,7 +421,7 @@ const BULK_MEALS = {
     },
     {
       name: "Pre-Bed Shake",
-      items: "1.5 scoops casein protein, 240ml rice milk, 150g banana (1 extra large)",
+      items: "1.5 scoops casein protein, 240ml soy milk, 150g banana (1 extra large)",
       detail: "457 cal | 41P 64C 6F"
     }
   ]
@@ -789,15 +799,15 @@ function getExercisesForDay(weekNum, dayOfWeek) {
 // ===== SUPPLEMENTS =====
 
 const SUPPLEMENTS_DAILY = [
+  { name: "Pre-workout (caffeine)", dose: "200-400mg 30-45 min before training" },
   { name: "Whey protein (pre/post workout)", dose: "30-40g each" },
-  { name: "Creatine monohydrate", dose: "5g post-workout with meal" },
-  { name: "Vitamin D3", dose: "2000-5000 IU daily" },
+  { name: "Creatine monohydrate", dose: "5g daily with post-workout meal" },
   { name: "Fish oil", dose: "2-3g EPA/DHA daily" },
   { name: "Multivitamin", dose: "1 serving daily" }
 ];
 
 const SUPPLEMENTS_REST = [
-  { name: "Vitamin D3", dose: "2000-5000 IU daily" },
+  { name: "Creatine monohydrate", dose: "5g daily with a meal" },
   { name: "Fish oil", dose: "2-3g EPA/DHA daily" },
   { name: "Multivitamin", dose: "1 serving daily" }
 ];
@@ -814,21 +824,12 @@ const SUPPLEMENTS_GUIDE = [
   },
   {
     name: "Creatine Monohydrate",
-    category: "Essential (Workout Days)",
-    dose: "5g daily, post-workout with a meal",
+    category: "Essential (All Days)",
+    dose: "5g daily (every day, including rest days)",
     what: "The most extensively researched sports supplement in history. Creatine is a naturally occurring compound produced by the body (liver, kidneys, pancreas) and found in red meat and fish.",
     mechanism: "Your muscles store creatine as phosphocreatine, which rapidly donates phosphate groups to ADP to regenerate ATP — your body's primary energy currency. Each extra rep on heavy sets (4-6 rep range) is an extra growth stimulus. Creatine also increases intracellular water, cell volumization, and may enhance satellite cell activity for long-term muscle growth.",
-    timing: "5g daily — take after your workout with a carb-containing meal (insulin spike improves uptake). No loading phase needed: 5g/day saturates muscles in 3-4 weeks. No cycling needed either — take it year-round.",
+    timing: "5g daily — take with your pre-workout shake on training days, or with breakfast on rest days. No loading phase needed: 5g/day saturates muscles in 3-4 weeks. No cycling needed either — take it year-round.",
     note: "Expect ~1-3kg of water weight gain in the first 3-4 weeks — this is intramuscular (inside muscle cells, not fat). It's a sign it's working. Choose micronised creatine monohydrate (dissolves better, less stomach upset) — it's the gold standard."
-  },
-  {
-    name: "Vitamin D3",
-    category: "Everyday",
-    dose: "2000-5000 IU daily with a fat-containing meal",
-    what: "A fat-soluble vitamin that functions more like a hormone than a vitamin. Most people living in northern latitudes or working indoors are deficient.",
-    mechanism: "Vitamin D acts on vitamin D receptors found in nearly every cell, including muscle tissue and testes. It's directly involved in testosterone synthesis, calcium absorption (bone density for heavy lifting), immune function (fewer sick days = more training days), and mood regulation.",
-    timing: "Take with your largest meal containing fat (e.g. lunch or dinner) for optimal absorption. In winter or if you work indoors 5 days/week, stay at the higher end (3000-5000 IU).",
-    note: "Consider getting a blood test (25-hydroxyvitamin D) to dial in your exact dose. Vitamin D is oil-soluble and stored long-term, so mega-dosing (10,000+ IU/day) without medical supervision is not advised."
   },
   {
     name: "Fish Oil (EPA & DHA)",
@@ -859,7 +860,7 @@ const SUPPLEMENTS_GUIDE = [
   },
   {
     name: "Pre-Workout (Caffeine)",
-    category: "Optional (Nice-to-Have)",
+    category: "Essential (Workout Days)",
     dose: "200-400mg caffeine 30-45 min before training",
     what: "Caffeine is the most widely used ergogenic aid. It's a central nervous system stimulant that blocks adenosine receptors, reducing perceived effort and fatigue.",
     mechanism: "Adenosine builds up during the day and makes you feel tired. Caffeine is structurally similar and binds to adenosine receptors without activating them — effectively turning off the 'I'm tired' signal.",
@@ -1252,7 +1253,7 @@ function render() {
       if (day.type === "workout" || day.type === "deload") {
         const note = document.createElement("div");
         note.style.cssText = "font-size:0.78em;color:var(--text-dim);margin-top:6px;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border);";
-        note.innerHTML = "Take creatine with post-workout meal (protein + carbs). No need to cycle — 5g daily.";
+        note.innerHTML = "Take creatine in your pre-workout shake. No need to cycle — 5g daily.";
         sec.appendChild(note);
       }
       card.appendChild(sec);
