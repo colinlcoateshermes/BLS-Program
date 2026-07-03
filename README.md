@@ -46,9 +46,9 @@ Weeks 9, 18, 27, 36, 45, 54 are **deload weeks** — 2 sets of 2 reps on compoun
 
 All training sessions follow this morning schedule:
 
-1. **Pre-Workout Shake**: 1 scoop whey isolate + 5g creatine + pre-workout (caffeine)
+1. **Pre-Workout Shake**: 2 scoops whey isolate (cut) / 1.5 scoops (bulk) + 5g creatine + pre-workout (caffeine)
 2. **WORKOUT** (60-75 min)
-3. **Post-Workout Breakfast**: Soy yogurt, whey, berries, granola (or bulk equivalent)
+3. **Post-Workout Breakfast**: Two options daily — omelette-based (A) or granola/smoothie-based (B)
 
 The app's meal plans are ordered accordingly — Pre-Workout first, then Post-Workout Breakfast after the workout.
 
@@ -68,23 +68,23 @@ The app automatically serves the correct meal plan based on the current phase:
 
 | Phase | Meal Plan | Macros |
 |-------|-----------|--------|
-| **Cut (Phases 1-2, Wks 1-18)** | Official BLS 4.0 210lb Cut (dairy-free, soy milk) | 2,305 cal — 233P / 236C / 52F (5 meals) |
-| **Bulk (Phases 3-6, Wks 19-54)** | Official BLS 4.0 210lb Lean Gain (dairy-free, soy milk) | 3,351 cal — 210P / 470C / 77F (6 meals) |
+| **Cut (Phases 1-2, Wks 1-18)** | Official BLS 4.0 210lb Cut (dairy-free, soy milk, breakfast options) | 2,309 cal — 227P / 237C / 50F (5 meals) |
+| **Bulk (Phases 3-6, Wks 19-54)** | Official BLS 4.0 210lb Lean Gain (dairy-free, soy milk, breakfast options) | 3,351 cal — 213P / 475C / 80F (6 meals) |
 
-### Cut Meals (2,305 cal) — Morning Workout Schedule
-1. **Pre-Workout**: Whey isolate, creatine, pre-workout (caffeine)
-2. **Post-Workout Breakfast**: Soy yogurt, whey isolate, berries, granola
-3. **Lunch**: Shrimp, white rice, sweet corn, bell pepper
-4. **Snack**: Double whey shake (soy milk), rice cakes, PBfit
-5. **Dinner**: Lean beef burger bun, tomato/lettuce
+### Cut Meals (2,309 cal) — Morning Workout Schedule
+1. **Pre-Workout**: 2 scoops whey isolate, creatine, pre-workout (caffeine)
+2. **Breakfast**: OPTION A: 3-egg omelette + oatmeal + berries + black coffee/soy milk | OPTION B: granola + soy yogurt + berries + smoothie
+3. **Lunch**: Chicken breast, taco shells, sweet corn, bell pepper, cabbage, Sriracha (no cheese)
+4. **Snack**: Soy-based protein yogurt + blueberries + cinnamon
+5. **Dinner**: Pork tenderloin, brown rice, broccoli, bell pepper, soy sauce, gummy bears
 
 ### Bulk Meals (3,351 cal) — Morning Workout Schedule
-1. **Pre-Workout**: Whey isolate, creatine, pre-workout (caffeine)
-2. **Post-Workout Breakfast**: Soy yogurt, mixed berries, granola
-3. **Lunch**: Chicken burrito bowl (no cheese), avocado
-4. **Snack**: Whey shake (soy milk), PB&J sandwiches
-5. **Dinner**: Sirloin steak, sweet potato, green beans
-6. **Pre-Bed**: Casein shake (soy milk), banana
+1. **Pre-Workout**: 1.5 scoops whey isolate, creatine, pre-workout (caffeine)
+2. **Breakfast**: OPTION A: 3-egg omelette + bagel + tomato + OJ + black coffee | OPTION B: granola + soy yogurt + berries + banana + OJ
+3. **Lunch**: Chicken breast, lentils, onion, tomato, chicken broth
+4. **Snack**: Whey shake (soy milk), 2 bananas, almond butter
+5. **Dinner**: Hamburger bun, lean beef, tomato/lettuce, ketchup, dairy-free ice cream
+6. **Pre-Bed**: Casein shake (soy milk), pineapple
 
 ## Supplements
 
@@ -112,10 +112,14 @@ Vitamin D3 is covered by the multivitamin — no standalone supplement needed.
 ## Features
 
 - **Check-off persistence** — tap any circle to mark it complete. Taps are saved automatically to your browser (localStorage).
+- **Breakfast options** — each meal plan shows Option A and Option B for breakfast with individual check-off tracking.
 - **Exercise descriptions** — tap "Show description" on any exercise for a full how-to, including links to relevant book screenshots.
 - **Set logging** — log weight and reps per set for every exercise. Data persists in the browser.
 - **RPE traffic light** — rate each exercise as Easy / OK / Hard.
 - **Image viewer** — tapping a screenshot link opens it full-screen. Tap again to close.
+- **Meal Plans Guide** — slide-in modal panel with detailed breakdown of each meal's purpose, timing, and substitutions.
+- **Supplements Guide** — slide-in modal panel with science-backed explanations for every supplement.
+- **Calorie tracker** — inline editable field on each day showing target and actual calories consumed, stored in localStorage.
 - **Progress stats** — completion percentage, total checkmarks, and weekly streak counter.
 - **Week navigation** — 54 week buttons. Deload weeks are highlighted in orange.
 - **Reset** — use the red reset button at the bottom to clear all progress.

@@ -293,7 +293,8 @@
   <div class="io-bar">
     <button class="io-btn" onclick="exportData()">Download Save</button>
     <button class="io-btn" onclick="document.getElementById('importInput').click()">Restore Save</button>
-    <button class="io-btn" onclick="showSupplementsGuide()">Supplements Guide</button>
+    <button class="io-btn" onclick="showGuide('supplements')">Supplements Guide</button>
+    <button class="io-btn" onclick="showGuide('meals')">Meal Plans Guide</button>
     <input type="file" id="importInput" accept=".json" onchange="importData(event)">
   </div>
 
@@ -303,12 +304,12 @@
   <button class="reset-btn" onclick="if(confirm('Reset ALL progress?')){localStorage.clear();location.reload()}">Reset All Progress</button>
 </div>
 
-<!-- Supplements Guide Modal -->
-<div class="guide-overlay" id="guideOverlay" onclick="closeSupplementsGuide()"></div>
+<!-- Guide Modal (Supplements + Meals) -->
+<div class="guide-overlay" id="guideOverlay" onclick="closeGuide()"></div>
 <div class="guide-panel" id="guidePanel">
   <div class="guide-header">
-    <h2>Supplements Guide</h2>
-    <button class="guide-close" onclick="closeSupplementsGuide()">&times;</button>
+    <h2 id="guideTitle">Guide</h2>
+    <button class="guide-close" onclick="closeGuide()">&times;</button>
   </div>
   <div class="guide-body" id="guideBody"></div>
 </div>
@@ -344,25 +345,31 @@ function getPhaseLabel(phaseNum) {
 // From BLS 4.0 bonus material — official 210lb plans (closest to 95kg/209lb)
 
 const MEAL_CUT = {
-  macros: { cals: 2305, protein: 233, carbs: 236, fat: 52 },
+  macros: { cals: 2309, protein: 227, carbs: 237, fat: 50 },
   meals: [
-    "1 scoop whey isolate, 5g creatine, 1 serving pre-workout (caffeine), water",
-    "1 serving soy-based protein yogurt, 1 scoop whey isolate, 50g blueberries/75g strawberries, 25g granola, cinnamon/nutmeg, 10g sugar (coffee), black coffee or soy creamer",
-    "260g shrimp, 35g dry white rice, 100g sweet corn, 150g bell pepper, cooking spray, 1 tbsp teriyaki sauce",
-    "2 scoops whey isolate, 240ml soy milk, 2 rice cakes, 18g PBfit powder (mixed)",
-    "1 seeded hamburger bun (74g), 200g 95% lean ground beef, 100g tomato/lettuce, 2 tbsp ketchup, hot sauce, 25g milk chocolate"
+    "2 scoops whey isolate, 5g creatine, 1 serving pre-workout (caffeine), water",
+    {title: "Breakfast (post-workout)", options: [
+      "OPTION A: 3-egg omelette + 50g oatmeal + 100g berries + black coffee/soy milk",
+      "OPTION B: 65g granola + soy yogurt + berries + black coffee + 1 small banana + 100g pineapple + 75g spinach smoothie with soy milk"
+    ]},
+    "260g chicken breast, 2 taco shells, 100g sweet corn, 100g bell pepper, 50g cabbage, 50g tomato, 50g onion, Sriracha (NO cheese)",
+    "350g soy-based protein yogurt + 50g blueberries + cinnamon",
+    "240g pork tenderloin, 60g brown rice, 100g broccoli, 150g bell pepper, soy sauce, 50g gummy bears"
   ]
 };
 
 const MEAL_BULK = {
-  macros: { cals: 3351, protein: 210, carbs: 470, fat: 77 },
+  macros: { cals: 3351, protein: 213, carbs: 475, fat: 80 },
   meals: [
-    "1 scoop whey isolate, 5g creatine, 1 serving pre-workout (caffeine), water",
-    "1 serving soy-based protein yogurt, 220g mixed berries, 65g granola, cinnamon/nutmeg, 10g sugar (coffee), black coffee or soy creamer",
-    "1 large flour tortilla (71g), 130g chicken breast, 150g refried beans, 30g dry brown rice, 30g low-fat cheddar, 100g tomato, 100g onion, 30g avocado, Sriracha",
-    "1 scoop whey isolate, 240ml soy milk, 2 slices whole-grain bread, 20g peanut butter, 45g jam",
-    "150g sirloin (trimmed fat), 360g sweet potato, 150g green beans, 150g carrots, cooking spray, 2 tbsp BBQ sauce",
-    "1.5 scoops casein protein, 240ml soy milk, 150g banana (1 extra large)"
+    "1.5 scoops whey isolate, 5g creatine, 1 serving pre-workout (caffeine), water",
+    {title: "Breakfast (post-workout)", options: [
+      "OPTION A: 3 eggs (omelette) + 1 bagel + 100g tomato + 240ml OJ + black coffee",
+      "OPTION B: 65g granola + soy yogurt + berries + 1 banana + 240ml OJ + black coffee"
+    ]},
+    "110g chicken breast, 120g lentils, 150g onion, 200g tomato, chicken broth",
+    "1.5 scoops whey isolate, 240ml soy milk, 2 bananas, 25g almond butter",
+    "1 hamburger bun, 100g 95% lean ground beef, 100g tomato/lettuce, 4 tbsp ketchup, 150g ice cream (dairy-free)",
+    "1.5 scoops casein protein + 240ml soy milk + 385g pineapple"
   ]
 };
 
@@ -793,7 +800,7 @@ function getDeloadExercises(exercises) {
 const SUPPLEMENTS_DAILY = [
   { name: "Pre-workout (caffeine)", dose: "200-400mg 30-45 min before training" },
   { name: "Whey protein (pre/post workout)", dose: "30-40g each" },
-  { name: "Creatine monohydrate", dose: "5g daily with post-workout meal" },
+  { name: "Creatine monohydrate", dose: "5g daily (in pre-workout shake)" },
   { name: "Fish oil", dose: "2-3g EPA/DHA daily" },
   { name: "Multivitamin", dose: "1 serving daily" }
 ];
@@ -849,14 +856,59 @@ const SUPPLEMENTS_GUIDE = [
   }
 ];
 
+const MEALS_GUIDE = [
+  {
+    name: "Pre-Workout Shake",
+    cat: "Cut & Bulk (Both)",
+    what: "A fast-digesting protein + creatine + stimulant combination taken before training to fuel performance and prime the body for muscle protein synthesis.",
+    mechanism: "Whey isolate spikes amino acids rapidly, creatine tops up phosphocreatine stores for ATP regeneration, and caffeine reduces perceived effort. This combination ensures you enter the workout with energy substrates already circulating.",
+    note: "Cut uses 2 scoops whey isolate (higher protein-to-calorie ratio). Bulk uses 1.5 scoops (slightly less protein, more calories from food later). Mix with water only — no milk or juice. Take creatine in your pre-workout shake."
+  },
+  {
+    name: "Breakfast (Post-Workout)",
+    cat: "Cut & Bulk (Both)",
+    what: "The first meal after training, designed to replenish glycogen and continue the anabolic window opened by the workout.",
+    mechanism: "After training, muscle cells are primed for glucose and amino acid uptake. A mixed meal of fast carbs + complete protein + micronutrients accelerates recovery and sets up the next training session. Two options are provided to prevent diet fatigue.",
+    note: "Cut Option A (omelette-based): Higher protein, lower carb — good for satiety. Cut Option B (smoothie-based): Faster-digesting, good for mornings when appetite is low after training. Bulk Option A (egg + bagel): Classic post-workout — bagel replenishes glycogen fast. Bulk Option B (granola + fruit): Lighter option. Both work equally well — rotate based on preference and digestion."
+  },
+  {
+    name: "Lunch",
+    cat: "Cut & Bulk (Both)",
+    what: "The midday meal providing a balanced mix of lean protein, fibrous carbs, and vegetables for sustained energy through the afternoon.",
+    mechanism: "Lean protein (chicken/pork/lentils) provides a steady amino acid release. Vegetables and legumes supply fiber, micronutrients, and volume for satiety. The Cut meal uses taco shells for a small carb bump; the Bulk meal uses lentils for more substantial carbs + plant protein.",
+    note: "Cut: Chicken breast + taco shells + vegetables + Sriracha. No cheese as per dairy-free requirements. Bulk: Chicken + lentils + onions/tomatoes in broth — a hearty soup-style meal. Both can be prepped in advance."
+  },
+  {
+    name: "Snack",
+    cat: "Cut & Bulk (Both)",
+    what: "A smaller meal bridging lunch and dinner, preventing excessive hunger and keeping protein synthesis elevated.",
+    mechanism: "The Cut snack uses soy-based protein yogurt (high protein, moderate carbs, no dairy) with blueberries for antioxidants. The Bulk snack uses whey + soy milk + bananas + almond butter — a higher-calorie combination that adds healthy fats and fast-digesting carbs.",
+    note: "Cut: 350g soy yogurt + 50g blueberries + cinnamon (delicious, filling, < 250 cal). Bulk: Whey shake + bananas + almond butter — this is a calorie-dense snack. The almond butter adds healthy monounsaturated fats."
+  },
+  {
+    name: "Dinner",
+    cat: "Cut & Bulk (Both)",
+    what: "The evening meal, designed around lean protein + quality carbs + vegetables. The Cut version is lighter; the Bulk version adds a treat.",
+    mechanism: "Pork tenderloin (Cut) is exceptionally lean while beef (Bulk) provides more iron and B vitamins. Brown rice (Cut) provides low-GI carbs for sustained overnight energy. The Bulk includes a small dessert (dairy-free ice cream) to hit the higher calorie target without excessive volume.",
+    note: "Cut: Pork tenderloin + brown rice + broccoli + bell peppers + soy sauce. Finish with 50g gummy bears for a controlled carb bump. Bulk: Hamburger bun + 95% lean beef + tomato/lettuce + ketchup + dairy-free ice cream. The beef burger satisfies cravings while staying on plan."
+  },
+  {
+    name: "Pre-Bed Shake",
+    cat: "Bulk Only",
+    what: "A slow-digesting protein shake taken before sleep to maintain a positive nitrogen balance through the overnight fast.",
+    mechanism: "Casein protein forms a gel in the stomach, releasing amino acids steadily over 6-8 hours. Combined with high-carb fruit (pineapple), this prevents overnight muscle breakdown and keeps MPS elevated through the night. Only used during Bulk — Cut macros don't allow the extra calories.",
+    note: "1.5 scoops casein + 240ml soy milk + 385g pineapple. The pineapple provides digestive enzymes (bromelain) and fast-digesting carbs that don't disturb sleep. Can substitute casein with soy protein isolate if dairy sensitivity is a concern."
+  }
+];
+
 // ===== APP STATE =====
 const STORAGE_KEY = "bls40_progress";
 
 function loadProgress() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {} };
-  } catch { return { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {} }; }
+    return raw ? JSON.parse(raw) : { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {}, calories: {} };
+  } catch { return { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {}, calories: {} }; }
 }
 
 function saveProgress(p) {
@@ -969,7 +1021,7 @@ function render() {
   };
   const infoBar = document.createElement("div");
   infoBar.style.cssText = "text-align:center;margin-bottom:12px;font-size:0.85em;color:var(--text-dim);padding:8px;background:var(--card);border-radius:8px;border:1px solid var(--border);";
-  const mealPlanLabel = week.phase <= 2 ? "Cut — 2305 cal • P233g • C236g • F52g" : "Bulk (Lean Gain) — 3351 cal • P210g • C470g • F77g";
+  const mealPlanLabel = week.phase <= 2 ? "Cut — 2309 cal • P227g • C237g • F50g" : "Bulk (Lean Gain) — 3351 cal • P213g • C475g • F80g";
   infoBar.innerHTML = `<strong>${phaseDesc[week.phase] || "Phase " + week.phase}</strong><br><span style="font-size:0.9em;color:var(--orange)">Meal Plan: ${mealPlanLabel}</span>`;
   if (week.isDeload) {
     infoBar.innerHTML += '<br><span style="color:var(--orange);font-weight:600">DELOAD WEEK — Reduce weights by 10-15%, focus on technique</span>';
@@ -1076,17 +1128,49 @@ function render() {
       `;
       sec.appendChild(macroRow);
 
+      // Calorie tracker
+      const calKey = makeId("cal", currentWeek, day.dayOfWeek);
+      const calDiv = document.createElement("div");
+      calDiv.style.cssText = "display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:0.85em;";
+      calDiv.innerHTML = `
+        <span style="color:var(--text-dim)">Target:</span>
+        <span style="font-weight:700;color:var(--green)">${day.plan.macros.cals} cal</span>
+        <span style="color:var(--text-dim);margin-left:4px">Actual:</span>
+        <input type="number" min="0" step="1" placeholder="0"
+          style="width:80px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:0.95em;text-align:center"
+          value="${p.calories[calKey] || ""}"
+          data-calorie="${calKey}">
+      `;
+      sec.appendChild(calDiv);
+
       const mealList = document.createElement("ul");
       mealList.className = "meal-list";
 
-      const mealTitles = ["Pre-Workout", "Breakfast (post-workout)", "Lunch", "Afternoon/Snack", "Dinner", "Pre-Bed Shake"];
+      const mealTitles = ["Pre-Workout", "Breakfast (post-workout)", "Lunch", "Snack", "Dinner", "Pre-Bed Shake"];
 
       day.plan.meals.forEach((meal, i) => {
         const mealKey = makeId("meal", currentWeek, day.dayOfWeek, i);
         const li = document.createElement("li");
+        
+        // Handle options-style meals (breakfast A/B)
+        let mealHtml = "";
+        if (typeof meal === "object" && meal.options) {
+          mealHtml = `<strong>${meal.title}:</strong><br style="margin-bottom:2px">` + meal.options.map((opt, oi) => {
+            const optKey = mealKey + "_opt" + oi;
+            const checked = p.meals[optKey] ? "checked" : "";
+            const symbol = p.meals[optKey] ? "✓" : "○";
+            return `<span style="display:flex;align-items:flex-start;gap:6px;margin-top:2px">
+              <span class="meal-check ${checked}" style="flex-shrink:0" data-key="${optKey}" data-type="meal">${symbol}</span>
+              <span>${opt}</span>
+            </span>`;
+          }).join("");
+        } else {
+          mealHtml = `<strong>${mealTitles[i] || "Meal " + (i+1)}:</strong> ${meal}`;
+        }
+
         li.innerHTML = `
-          <span class="meal-check ${p.meals[mealKey] ? "checked" : ""}" data-key="${mealKey}" data-type="meal">${p.meals[mealKey] ? "✓" : "○"}</span>
-          <span class="meal-name"><strong>${mealTitles[i] || "Meal " + (i+1)}:</strong> ${meal}</span>
+          <span class="meal-check ${p.meals[mealKey] ? "checked" : ""}" data-key="${mealKey}" data-type="meal" style="flex-shrink:0">${p.meals[mealKey] ? "✓" : "○"}</span>
+          <span class="meal-name">${mealHtml}</span>
         `;
         mealList.appendChild(li);
       });
@@ -1176,6 +1260,10 @@ function attachListeners() {
     el.removeEventListener("click", handleRpeClick);
     el.addEventListener("click", handleRpeClick);
   });
+  document.querySelectorAll("[data-calorie]").forEach(el => {
+    el.removeEventListener("change", handleCalorieChange);
+    el.addEventListener("change", handleCalorieChange);
+  });
 }
 
 function handleCheck(e) {
@@ -1237,6 +1325,19 @@ function handleRpeClick(e) {
   saveProgress(p);
 }
 
+function handleCalorieChange(e) {
+  const el = e.currentTarget;
+  const key = el.dataset.calorie;
+  const val = el.value;
+  const p = getStorage();
+  if (val) {
+    p.calories[key] = parseInt(val, 10) || 0;
+  } else {
+    delete p.calories[key];
+  }
+  saveProgress(p);
+}
+
 // Lightbox for images
 document.addEventListener("click", function(e) {
   if (e.target.tagName === "A" && e.target.href && e.target.href.includes("images/")) {
@@ -1291,35 +1392,45 @@ function showToast(msg) {
   setTimeout(() => el.classList.remove("show"), 2500);
 }
 
-// ===== SUPPLEMENTS GUIDE =====
-function showSupplementsGuide() {
+// ===== GUIDE MODAL (Supplements + Meals) =====
+function showGuide(type) {
+  const body = document.getElementById("guideBody");
+  const title = document.getElementById("guideTitle");
+  let html = "";
+  if (type === "supplements") {
+    title.textContent = "Supplements Guide";
+    for (const s of SUPPLEMENTS_GUIDE) {
+      html += `<div class="guide-supp">
+        <h3>${s.name}</h3>
+        <div class="guide-cat">${s.cat}</div>
+        <div class="guide-what"><span class="guide-label">What it is:</span> ${s.what}</div>
+        <div class="guide-mech"><span class="guide-label">How it works:</span> ${s.mechanism}</div>
+        <div class="guide-note"><span class="guide-label">Notes:</span> ${s.note}</div>
+      </div>`;
+    }
+  } else {
+    title.textContent = "Meal Plans Guide";
+    for (const m of MEALS_GUIDE) {
+      html += `<div class="guide-supp">
+        <h3>${m.name}</h3>
+        <div class="guide-cat">${m.cat}</div>
+        <div class="guide-what"><span class="guide-label">What it is:</span> ${m.what}</div>
+        <div class="guide-mech"><span class="guide-label">How it works:</span> ${m.mechanism}</div>
+        <div class="guide-note"><span class="guide-label">Notes:</span> ${m.note}</div>
+      </div>`;
+    }
+  }
+  body.innerHTML = html;
   document.getElementById("guideOverlay").classList.add("show");
   document.getElementById("guidePanel").classList.add("show");
   document.body.style.overflow = "hidden";
 }
 
-function closeSupplementsGuide() {
+function closeGuide() {
   document.getElementById("guideOverlay").classList.remove("show");
   document.getElementById("guidePanel").classList.remove("show");
   document.body.style.overflow = "";
 }
-
-// Build guide content
-(function buildGuide() {
-  const body = document.getElementById("guideBody");
-  if (!body) return;
-  let html = "";
-  for (const s of SUPPLEMENTS_GUIDE) {
-    html += `<div class="guide-supp">
-      <h3>${s.name}</h3>
-      <div class="guide-cat">${s.cat}</div>
-      <div class="guide-what"><span class="guide-label">What it is:</span> ${s.what}</div>
-      <div class="guide-mech"><span class="guide-label">How it works:</span> ${s.mechanism}</div>
-      <div class="guide-note"><span class="guide-label">Notes:</span> ${s.note}</div>
-    </div>`;
-  }
-  body.innerHTML = html;
-})();
 
 render();
 </script>
