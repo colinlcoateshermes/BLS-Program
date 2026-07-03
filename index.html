@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>BLS 12-Week Program</title>
+<title>BLS 4.0 — 20-Week Cut & Bulk</title>
 <style>
   :root {
     --bg: #0d1117;
@@ -37,7 +37,11 @@
     margin-bottom: 16px;
   }
   .header h1 { font-size: 1.5em; color: #fff; margin-bottom: 4px; }
-  .header p { color: var(--text-dim); font-size: 0.9em; }
+  .header .subtitle { color: var(--text-dim); font-size: 0.85em; margin-bottom: 4px; }
+  .header .phase-badge {
+    display: inline-block; font-size: 0.75em; padding: 2px 10px; border-radius: 20px;
+    background: var(--purple); color: #fff; font-weight: 600; margin-top: 4px;
+  }
   .stats-bar {
     display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap;
   }
@@ -50,12 +54,12 @@
 
   /* Import / Export bar */
   .io-bar {
-    display: flex; gap: 8px; margin-bottom: 16px;
+    display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
   }
   .io-btn {
     flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 8px;
     background: var(--card); color: var(--accent); cursor: pointer;
-    font-size: 0.85em; text-align: center; transition: all 0.2s;
+    font-size: 0.85em; text-align: center; transition: all 0.2s; min-width: 80px;
   }
   .io-btn:hover { background: #1c2333; }
   #importInput { display: none; }
@@ -72,6 +76,10 @@
   .week-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
   .week-btn.completed { border-color: var(--green); }
   .week-btn:hover { background: #1c2333; }
+  .week-btn.deload {
+    border-color: var(--orange); color: var(--orange);
+  }
+  .week-btn.deload.active { background: var(--orange); color: #fff; }
 
   /* Day card */
   .day-card {
@@ -83,6 +91,7 @@
   }
   .day-card.completed-day { border-color: var(--green); opacity: 0.85; }
   .day-card.rest-day { border-color: var(--orange); }
+  .day-card.deload-day { border-color: var(--orange); }
   .day-header {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 12px; cursor: pointer;
@@ -94,6 +103,7 @@
   }
   .day-header .day-type.rest { background: var(--orange); }
   .day-header .day-type.workout { background: var(--green); }
+  .day-header .day-type.deload { background: var(--orange); }
   .day-check { font-size: 1.3em; color: var(--text-dim); cursor: pointer; }
   .day-check.checked { color: var(--green); }
 
@@ -190,7 +200,7 @@
   .meal-check { cursor: pointer; color: var(--text-dim); flex-shrink: 0; }
   .meal-check.checked { color: var(--green); }
   .meal-name { flex: 1; }
-  .meal-cal { color: var(--text-dim); font-size: 0.85em; }
+  .meal-cal { color: var(--text-dim); font-size: 0.85em; flex-shrink: 0; }
 
   /* Supplements */
   .supplement-item {
@@ -283,17 +293,17 @@
 <body>
 <div class="container" id="app">
   <div class="header">
-    <h1>Bigger Leaner Stronger</h1>
-    <p>12-Week Program &mdash; Based on the book by Michael Matthews</p>
+    <h1>Bigger Leaner Stronger 4.0</h1>
+    <div class="subtitle">20-Week Cut &amp; Bulk — Based on BLS 4.0 by Michael Matthews</div>
+    <div class="phase-badge" id="headerPhaseBadge">Phase 1 — Cut</div>
     <div class="stats-bar">
       <div class="stat"><div class="num" id="statPct">0%</div><div class="label">Complete</div></div>
-      <div class="stat"><div class="num" id="statDays">0/84</div><div class="label">Checks Done</div></div>
+      <div class="stat"><div class="num" id="statDays">0/20</div><div class="label">Weeks Done</div></div>
       <div class="stat"><div class="num" id="statStreak">0</div><div class="label">Week Streak</div></div>
     </div>
   </div>
 
   <div class="io-bar">
-    <button class="io-btn" onclick="togglePhase()" id="phaseToggle" style="border-color:var(--accent);color:#fff;font-weight:600;background:var(--accent);">Switch to Bulking</button>
     <button class="io-btn" onclick="exportData()">Download Save</button>
     <button class="io-btn" onclick="document.getElementById('importInput').click()">Restore Save</button>
     <button class="io-btn" onclick="showSupplementsGuide()">Supplements Guide</button>
@@ -318,29 +328,97 @@
 </div>
 
 <script>
-// ===== DATA =====
+// ===== PHASE & WEEK STRUCTURE =====
+// 4 phases × 5 weeks each (4 training + 1 deload) = 20 weeks
+// Cut = Phases 1-2 (weeks 1-10), Bulk = Phases 3-4 (weeks 11-20)
 
-const USER_BW = 209; // 95kg — default bodyweight lbs
+const PHASES = [
+  { phase: 1, label: "Phase 1", trainingWeeks: [1,2,3,4], deloadWeek: 5 },
+  { phase: 2, label: "Phase 2", trainingWeeks: [6,7,8,9], deloadWeek: 10 },
+  { phase: 3, label: "Phase 3", trainingWeeks: [11,12,13,14], deloadWeek: 15 },
+  { phase: 4, label: "Phase 4", trainingWeeks: [16,17,18,19], deloadWeek: 20 }
+];
 
-function calcBulking(bw) {
-  return {
-    protein: Math.round(bw * 1),
-    carbs: Math.round(bw * 2),
-    fat: Math.round(bw * 0.4),
-    cals: Math.round(bw * 1 * 4 + bw * 2 * 4 + bw * 0.4 * 9)
-  };
+const TOTAL_WEEKS = 20;
+const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+function getPhaseForWeek(w) {
+  for (const p of PHASES) {
+    if (p.trainingWeeks.includes(w)) return { phase: p.phase, isDeload: false };
+    if (p.deloadWeek === w) return { phase: p.phase, isDeload: true };
+  }
+  return { phase: 1, isDeload: false };
 }
 
-function calcCutting(bw) {
-  return {
-    protein: Math.round(bw * 1.2),
-    carbs: Math.round(bw * 1),
-    fat: Math.round(bw * 0.2),
-    cals: Math.round(bw * 1.2 * 4 + bw * 1 * 4 + bw * 0.2 * 9)
-  };
+function getPhaseLabel(phaseNum) {
+  const labels = {1: "Phase 1 — Cut", 2: "Phase 2 — Cut", 3: "Phase 3 — Bulk", 4: "Phase 4 — Bulk"};
+  return labels[phaseNum] || "Phase " + phaseNum;
 }
 
-// Exercise library with descriptions and image references
+function isCutWeek(w) { return w <= 10; }
+function isBulkWeek(w) { return w > 10; }
+
+// ===== MEAL PLANS (official BLS 4.0) =====
+
+const CUT_MEALS = {
+  macros: { cals: 2305, protein: 233, carbs: 236, fat: 52 },
+  meals: [
+    {
+      name: "Breakfast",
+      items: "250g Skyr/Greek yogurt (2%), 1 scoop whey isolate, 50g blueberries/75g strawberries, 25g granola, cinnamon/nutmeg, 2 tbsp half-and-half (coffee), 10g sugar (coffee)",
+      detail: "527 cal | 51P 50C 15F"
+    },
+    {
+      name: "Lunch",
+      items: "260g shrimp, 35g dry white rice, 100g sweet corn, 150g bell pepper, cooking spray, 1 tbsp teriyaki sauce",
+      detail: "522 cal | 62P 61C 5F"
+    },
+    {
+      name: "Snack (Pre/Post Workout)",
+      items: "2 scoops whey isolate, 1 cup skim milk, 2 rice cakes, 18g PBfit powder (mixed)",
+      detail: "543 cal | 64P 55C 7F"
+    },
+    {
+      name: "Dinner",
+      items: "1 seeded hamburger bun (74g), 200g 95% lean ground beef, 15g low-fat cheddar, 100g tomato/lettuce, 2 tbsp ketchup, hot sauce, 25g milk chocolate",
+      detail: "713 cal | 56P 69C 24F"
+    }
+  ]
+};
+
+const BULK_MEALS = {
+  macros: { cals: 3351, protein: 210, carbs: 470, fat: 77 },
+  meals: [
+    {
+      name: "Breakfast",
+      items: "250g Skyr/Greek yogurt (2%), 220g mixed berries, 65g granola, cinnamon/nutmeg, 2 tbsp half-and-half, 10g sugar (coffee)",
+      detail: "682 cal | 34P 99C 19F"
+    },
+    {
+      name: "Lunch",
+      items: "1 large flour tortilla (71g), 130g chicken breast, 150g refried beans, 30g dry brown rice, 30g low-fat cheddar, 100g tomato, 100g onion, 30g avocado, Sriracha",
+      detail: "822 cal | 53P 99C 25F"
+    },
+    {
+      name: "Snack",
+      items: "1 scoop whey isolate, 240ml rice milk, 2 slices whole-grain bread, 20g peanut butter, 45g jam",
+      detail: "694 cal | 39P 97C 18F"
+    },
+    {
+      name: "Dinner",
+      items: "150g sirloin (trimmed fat), 360g sweet potato, 150g green beans, 150g carrots, cooking spray, 2 tbsp BBQ sauce",
+      detail: "696 cal | 43P 111C 9F"
+    },
+    {
+      name: "Pre-Bed Shake",
+      items: "1.5 scoops casein protein, 240ml rice milk, 150g banana (1 extra large)",
+      detail: "457 cal | 41P 64C 6F"
+    }
+  ]
+};
+
+// ===== EXERCISE DESCRIPTIONS =====
+
 const EXERCISES = {
   "Incline Barbell Bench Press": {
     desc: "Set bench to 30-45° incline. Lie back, retract shoulder blades, grip slightly wider than shoulder-width. Lower bar to just below collarbones with elbows at ~45°. Touch chest, then drive up explosively. Keep feet planted, butt on bench.",
@@ -356,11 +434,11 @@ const EXERCISES = {
     desc: "Set bench to 30°. Hold dumbbells at shoulders, palms forward. Press up evenly, keeping shoulders retracted. Lower dumbbells to chest level with elbows at ~45°. Don't let dumbbells drift too wide.",
     img: null
   },
-  "Flat Dumbbell Bench Press": {
+  "Dumbbell Bench Press": {
     desc: "Lie on flat bench, hold dumbbells at chest, palms forward. Press up, keeping shoulders packed. Lower to chest level. Maintain control throughout.",
     img: null
   },
-  "Dip (Chest Variation)": {
+  "Dip": {
     desc: "On parallel bars, lean torso forward ~30°. Lower until upper arms are parallel to floor or slightly below. Press up. Add weight via dip belt when bodyweight gets easy (4-6 reps). Keep elbows flared slightly, not tucked.",
     img: null
   },
@@ -369,8 +447,20 @@ const EXERCISES = {
     img: "images/deadlift-start.jpeg",
     imgLabel: "Deadlift Starting Position (p. 227)"
   },
+  "One-Arm Dumbbell Row": {
+    desc: "Place one knee and hand on a bench, back flat. Hold dumbbell in other hand, arm hanging. Pull dumbbell to hip, squeezing lat. Lower under control. Keep torso stable — no twisting.",
+    img: null
+  },
   "Barbell Row": {
     desc: "Hinge at hips with slight knee bend, torso ~45° to floor. Grip bar shoulder-width, palms down. Pull bar to lower chest/upper abs, squeezing shoulder blades. Lower under control. Keep back flat throughout.",
+    img: null
+  },
+  "Dumbbell Hammer Curl": {
+    desc: "Stand with dumbbells at sides, palms facing each other (neutral grip). Curl weights toward shoulders keeping palms facing in throughout. Squeeze at top, lower under control. No swinging.",
+    img: null
+  },
+  "EZ Bar Curl": {
+    desc: "Stand with EZ-bar, grip at shoulder width on the angled handles, palms up. Keeping elbows pinned to sides, curl bar to shoulders. Lower under control — don't swing.",
     img: null
   },
   "Wide-Grip Pull-Up": {
@@ -381,16 +471,24 @@ const EXERCISES = {
     desc: "Grip bar shoulder-width, palms facing you. Pull chin over bar, leaning back slightly. Lower under control. Slightly more biceps emphasis than pull-ups.",
     img: null
   },
-  "Close-Grip Lat Pulldown": {
-    desc: "Grip bar with close neutral or underhand grip. Lean back slightly, pull bar to upper chest. Squeeze lats. Return under control.",
+  "Pull-Up": {
+    desc: "Grip bar slightly wider than shoulder-width, palms facing away. Hang with full extension. Pull chin over bar, driving elbows down. Lower under control. Add weight via belt when you can do 6+ clean reps.",
     img: null
   },
-  "Seated Cable Row": {
-    desc: "Sit at cable station, feet braced. Grip handle, keep back straight. Pull handle to stomach, squeeze shoulder blades together. Extend arms under control.",
+  "Lat Pulldown (Medium-Grip)": {
+    desc: "Sit at lat pulldown station, grip bar slightly wider than shoulder-width. Lean back slightly, pull bar to upper chest. Squeeze lats. Return under control. Don't use momentum.",
     img: null
   },
-  "T-Bar Row": {
-    desc: "Straddle T-bar, bend at hips, back flat. Pull bar to chest, squeezing back. Lower under control.",
+  "Lat Pulldown (Close-Grip)": {
+    desc: "Sit at lat pulldown station, grip bar with close underhand (palms facing you) or neutral grip. Lean back slightly, pull to upper chest. Squeeze lats. Return under control.",
+    img: null
+  },
+  "Seated Cable Row (Close-Grip)": {
+    desc: "Sit at cable station, feet braced. Use close-grip handle (V-grip). Keep back straight, pull handle to stomach, squeeze shoulder blades together. Extend arms under control. Don't lean forward/back excessively.",
+    img: null
+  },
+  "Seated Cable Row (Wide-Grip)": {
+    desc: "Sit at cable station, feet braced. Use wide-grip bar attachment. Keep back straight, pull bar to stomach, squeeze shoulder blades together. Extend arms under control.",
     img: null
   },
   "Barbell Shrug": {
@@ -427,16 +525,36 @@ const EXERCISES = {
     img: "images/military-press-station.jpeg",
     imgLabel: "Military Press Setup (p. 245)"
   },
-  "Standing Barbell Military Press": {
-    desc: "Same as seated but standing. Feet shoulder-width, brace core hard. Press bar from clavicles to overhead. Tilt head back on descent. Squeeze glutes at lockout.",
+  "Seated Dumbbell Press": {
+    desc: "Sit on bench with back support, dumbbells at shoulders, palms forward. Press up evenly, keeping shoulders retracted. Lower to shoulder level. Don't arch excessively.",
     img: null
   },
-  "Side Lateral Raise": {
+  "Standing Barbell Overhead Press": {
+    desc: "Stand feet shoulder-width, bar at clavicles. Brace core. Press bar overhead, shifting head back slightly. Lock out, then lower to clavicles. Squeeze glutes at lockout for stability.",
+    img: null
+  },
+  "Seated Barbell Overhead Press": {
+    desc: "Sit on bench with back support, bar at collarbone. Press overhead until arms extended. Lower with control. Keep core braced throughout.",
+    img: null
+  },
+  "Arnold Dumbbell Press": {
+    desc: "Sit on bench holding dumbbells in front of shoulders, palms facing you. Press up while rotating palms to face forward at top. Reverse the motion on the way down. This rotation increases range of motion and hits all three delt heads.",
+    img: null
+  },
+  "Dumbbell Side Lateral Raise": {
     desc: "Stand with dumbbells at sides, slight forward lean. Raise arms out to sides until parallel to floor, leading with elbows. Pause at top, lower slowly. Use controlled weight — no swinging.",
     img: null
   },
-  "Bent-Over Rear Delt Raise": {
+  "Dumbbell Rear Lateral Raise": {
     desc: "Hinge forward with flat back, dumbbells hanging. Raise arms out to sides, squeezing rear delts. Lower under control. Elbows slightly bent throughout.",
+    img: null
+  },
+  "Barbell Rear Delt Row": {
+    desc: "Hinge at hips, torso near parallel to floor. Grip barbell with wide overhand grip. Pull bar to upper chest, flaring elbows out to target rear delts. Lower under control.",
+    img: null
+  },
+  "Machine Reverse Fly": {
+    desc: "Sit at reverse fly (pec deck) machine facing in, grasp handles with arms extended in front. Squeeze arms backward in an arc, squeezing rear delts. Return slowly. Keep chest on pad.",
     img: null
   },
   "Barbell Squat": {
@@ -453,13 +571,25 @@ const EXERCISES = {
     desc: "Sit on leg press sled, feet shoulder-width on platform. Lower until knees at ~90°. Drive through entire foot to press up. Don't lock knees at top.",
     img: null
   },
+  "Leg Curl": {
+    desc: "Lie face down on leg curl machine, pad behind ankles. Curl heels toward glutes, squeezing hamstrings. Lower under control. Don't let hips rise off pad.",
+    img: null
+  },
   "Romanian Deadlift": {
     desc: "Start with bar on safety pins at mid-thigh. Lock knees, back tight. Push hips back, slide bar down thighs past knees. Go as low as you can without back rounding. Drive hips forward to return. Hamstring focus.",
     img: "images/rdl.jpeg",
     imgLabel: "Romanian Deadlift (p. 237)"
   },
+  "Dumbbell Lunge (Walking or In-Place)": {
+    desc: "Hold dumbbells at sides. Step forward with one leg, lowering until both knees are at ~90°. Front knee above ankle, back knee just above floor. Push off front foot to return. Alternate legs. Keep torso upright.",
+    img: null
+  },
+  "Dumbbell Bulgarian Split Squat": {
+    desc: "Stand facing away from bench, place rear foot on bench top. Hold dumbbells at sides. Lower rear knee toward floor until front thigh is parallel. Drive through front heel to return. Keep torso upright. This is a brutal quad and glute exercise.",
+    img: null
+  },
   "Standing Calf Raise": {
-    desc: "Stand on calf raise machine, pads on shoulders. Lower heels as far as possible. Explode up onto tiptoes. Hold at top. Use 2-1-2 tempo. Vary toe position: forward, out 20°, in.",
+    desc: "Stand on calf raise machine, pads on shoulders. Lower heels as far as possible. Explode up onto tiptoes. Hold at top. Use 2-1-2 tempo. Vary toe position.",
     img: null
   },
   "Seated Calf Raise": {
@@ -474,7 +604,6 @@ const EXERCISES = {
     desc: "Bend forward at hips with support, weight on lower back (or use machine). Lower heels, raise up onto toes. Full ROM.",
     img: null
   },
-  // Abs
   "Cable Crunch": {
     desc: "Kneel facing cable station with rope attached overhead. Hold rope at temples, crunch down toward knees. Squeeze abs. Return under control.",
     img: null
@@ -484,7 +613,7 @@ const EXERCISES = {
     img: null
   },
   "Captain's Chair Leg Raise": {
-    desc: "Support body on captain's chair arm pads, back against pad. Raise knees toward chest, squeeze abs. Lower slowly. Add weight between feet as needed.",
+    desc: "Support body on captain's chair arm pads, back against pad. Raise knees toward chest, squeeze abs. Lower slowly.",
     img: null
   },
   "Ab Roller": {
@@ -505,7 +634,160 @@ const EXERCISES = {
   }
 };
 
-// Program structure: 12 weeks, 6 days per week (Tue off)
+// ===== WORKOUT DATA — BLS 4.0 5-DAY ROUTINE =====
+// Schedule: Mon=Push, Tue=REST, Wed=Pull, Thu=Upper Body A, Fri=Legs, Sat=Upper Body B, Sun=REST
+
+const WORKOUTS = {
+  // WEEK-SPECIFIC (training week ranges are: Phase 1=wk1-4, Phase 2=wk6-9, Phase 3=wk11-14, Phase 4=wk16-19)
+
+  // ---- PHASE 1 TRAINING ----
+  1: { phase: 1,
+    // Push
+    "0": [{ name: "Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Incline Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Dumbbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Triceps Pushdown", numSets: 3, reps: "6-8", rest: "2 min" }],
+    // Pull
+    "2": [{ name: "Barbell Deadlift", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "One-Arm Dumbbell Row", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Lat Pulldown (Medium-Grip)", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Alternating Dumbbell Curl", numSets: 3, reps: "6-8", rest: "2 min" }],
+    // Upper A
+    "3": [{ name: "Seated Dumbbell Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Dumbbell Side Lateral Raise", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Dumbbell Rear Lateral Raise", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Seated Triceps Press", numSets: 3, reps: "6-8", rest: "2 min" }],
+    // Legs
+    "4": [{ name: "Barbell Squat", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Leg Curl", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Leg Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Dumbbell Lunge (Walking or In-Place)", numSets: 3, reps: "6-8", rest: "2 min" }],
+    // Upper B
+    "5": [{ name: "Close-Grip Bench Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Chin-Up", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Seated Cable Row (Close-Grip)", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Barbell Curl", numSets: 3, reps: "6-8", rest: "2 min" }]
+  },
+
+  // ---- PHASE 2 TRAINING ----
+  6: { phase: 2,
+    "0": [{ name: "Incline Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Dumbbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Incline Dumbbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Lying Triceps Extension (Skullcrusher)", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "2": [{ name: "Barbell Deadlift", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Seated Cable Row (Wide-Grip)", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Lat Pulldown (Close-Grip)", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Dumbbell Hammer Curl", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "3": [{ name: "Seated Barbell Overhead Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Barbell Rear Delt Row", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Dumbbell Side Lateral Raise", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Triceps Pushdown", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "4": [{ name: "Barbell Squat", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Romanian Deadlift", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Front Squat", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Dumbbell Bulgarian Split Squat", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "5": [{ name: "Dip", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Pull-Up", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "One-Arm Dumbbell Row", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "EZ Bar Curl", numSets: 3, reps: "6-8", rest: "2 min" }]
+  },
+
+  // ---- PHASE 3 TRAINING ----
+  11: { phase: 3,
+    "0": [{ name: "Dumbbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Incline Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Triceps Pushdown", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "2": [{ name: "Barbell Deadlift", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Barbell Row", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Lat Pulldown (Medium-Grip)", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Alternating Dumbbell Curl", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "3": [{ name: "Standing Barbell Overhead Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Dumbbell Side Lateral Raise", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Dumbbell Rear Lateral Raise", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Seated Triceps Press", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "4": [{ name: "Barbell Squat", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Leg Curl", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Leg Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Dumbbell Lunge (Walking or In-Place)", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "5": [{ name: "Close-Grip Bench Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Chin-Up", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Seated Cable Row (Wide-Grip)", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Barbell Curl", numSets: 3, reps: "6-8", rest: "2 min" }]
+  },
+
+  // ---- PHASE 4 TRAINING ----
+  16: { phase: 4,
+    "0": [{ name: "Incline Dumbbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Incline Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Lying Triceps Extension (Skullcrusher)", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "2": [{ name: "Barbell Deadlift", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "One-Arm Dumbbell Row", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Lat Pulldown (Close-Grip)", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Dumbbell Hammer Curl", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "3": [{ name: "Arnold Dumbbell Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Machine Reverse Fly", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Dumbbell Side Lateral Raise", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "Triceps Pushdown", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "4": [{ name: "Barbell Squat", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Romanian Deadlift", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Front Squat", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Dumbbell Bulgarian Split Squat", numSets: 3, reps: "6-8", rest: "2 min" }],
+    "5": [{ name: "Dip", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
+          { name: "Pull-Up", numSets: 3, reps: "4-6", rest: "3 min" },
+          { name: "Seated Cable Row (Close-Grip)", numSets: 3, reps: "6-8", rest: "2 min" },
+          { name: "EZ Bar Curl", numSets: 3, reps: "6-8", rest: "2 min" }]
+  }
+};
+
+// For deload weeks, we use the same exercises but lower volume
+// Compounds: 2 sets of 2 reps, Accessories: 2 sets of 4 reps
+function getDeloadExercises(baseExercises) {
+  return baseExercises.map(ex => {
+    const isCompound = ex.warmup || parseInt(ex.reps) <= 6;
+    return {
+      ...ex,
+      numSets: 2,
+      reps: isCompound ? "2" : "4",
+      rest: "2 min",
+      warmup: ex.warmup ? true : false
+    };
+  });
+}
+
+// Get training exercises for a specific week
+function getTrainingExercises(weekNum, dayOfWeek) {
+  const info = getPhaseForWeek(weekNum);
+
+  // Find which base week to use for this phase
+  let baseWeek;
+  if (info.phase === 1) baseWeek = 1;
+  else if (info.phase === 2) baseWeek = 6;
+  else if (info.phase === 3) baseWeek = 11;
+  else if (info.phase === 4) baseWeek = 16;
+
+  const weekWorkout = WORKOUTS[baseWeek];
+  if (!weekWorkout) return [];
+
+  const dayKey = String(dayOfWeek);
+  const baseExercises = weekWorkout[dayKey] || [];
+  return baseExercises;
+}
+
+function getExercisesForDay(weekNum, dayOfWeek) {
+  const info = getPhaseForWeek(weekNum);
+  const baseExercises = getTrainingExercises(weekNum, dayOfWeek);
+
+  if (info.isDeload) {
+    return getDeloadExercises(baseExercises);
+  }
+  return baseExercises;
+}
+
+// ===== SUPPLEMENTS =====
+
 const SUPPLEMENTS_DAILY = [
   { name: "Whey protein (pre/post workout)", dose: "30-40g each" },
   { name: "Creatine monohydrate", dose: "5g post-workout with meal" },
@@ -520,7 +802,6 @@ const SUPPLEMENTS_REST = [
   { name: "Multivitamin", dose: "1 serving daily" }
 ];
 
-// Detailed supplement guide — rendered in modal
 const SUPPLEMENTS_GUIDE = [
   {
     name: "Whey Protein",
@@ -536,17 +817,17 @@ const SUPPLEMENTS_GUIDE = [
     category: "Essential (Workout Days)",
     dose: "5g daily, post-workout with a meal",
     what: "The most extensively researched sports supplement in history. Creatine is a naturally occurring compound produced by the body (liver, kidneys, pancreas) and found in red meat and fish.",
-    mechanism: "Your muscles store creatine as phosphocreatine, which rapidly donates phosphate groups to ADP to regenerate ATP — your body's primary energy currency. Each extra rep on heavy sets (4-6 rep range — your BLS foundation work) is an extra growth stimulus. Creatine also increases intracellular water, cell volumization, and may enhance satellite cell activity for long-term muscle growth.",
+    mechanism: "Your muscles store creatine as phosphocreatine, which rapidly donates phosphate groups to ADP to regenerate ATP — your body's primary energy currency. Each extra rep on heavy sets (4-6 rep range) is an extra growth stimulus. Creatine also increases intracellular water, cell volumization, and may enhance satellite cell activity for long-term muscle growth.",
     timing: "5g daily — take after your workout with a carb-containing meal (insulin spike improves uptake). No loading phase needed: 5g/day saturates muscles in 3-4 weeks. No cycling needed either — take it year-round.",
-    note: "Expect ~1-3kg of water weight gain in the first 3-4 weeks — this is intramuscular (inside muscle cells, not fat). It's a sign it's working. Choose micronised creatine monohydrate (dissolves better, less stomach upset) — it's the gold standard, no need for expensive \"buffered\" or \"salt-free\" versions."
+    note: "Expect ~1-3kg of water weight gain in the first 3-4 weeks — this is intramuscular (inside muscle cells, not fat). It's a sign it's working. Choose micronised creatine monohydrate (dissolves better, less stomach upset) — it's the gold standard."
   },
   {
     name: "Vitamin D3",
     category: "Everyday",
     dose: "2000-5000 IU daily with a fat-containing meal",
     what: "A fat-soluble vitamin that functions more like a hormone than a vitamin. Most people living in northern latitudes or working indoors are deficient.",
-    mechanism: "Vitamin D acts on vitamin D receptors found in nearly every cell, including muscle tissue and testes. It's directly involved in testosterone synthesis, calcium absorption (bone density for heavy lifting), immune function (fewer sick days = more training days), and mood regulation. Adequate vitamin D levels correlate with higher strength gains and lower injury risk.",
-    timing: "Take with your largest meal containing fat (e.g. lunch or dinner) for optimal absorption. If you get significant unprotected sun exposure (20+ mins midday), you can reduce supplementation. In winter or if you work indoors 5 days/week, stay at the higher end (3000-5000 IU).",
+    mechanism: "Vitamin D acts on vitamin D receptors found in nearly every cell, including muscle tissue and testes. It's directly involved in testosterone synthesis, calcium absorption (bone density for heavy lifting), immune function (fewer sick days = more training days), and mood regulation.",
+    timing: "Take with your largest meal containing fat (e.g. lunch or dinner) for optimal absorption. In winter or if you work indoors 5 days/week, stay at the higher end (3000-5000 IU).",
     note: "Consider getting a blood test (25-hydroxyvitamin D) to dial in your exact dose. Vitamin D is oil-soluble and stored long-term, so mega-dosing (10,000+ IU/day) without medical supervision is not advised."
   },
   {
@@ -554,182 +835,110 @@ const SUPPLEMENTS_GUIDE = [
     category: "Everyday",
     dose: "2-3g combined EPA/DHA daily with food",
     what: "Long-chain omega-3 fatty acids — eicosapentaenoic acid (EPA) and docosahexaenoic acid (DHA). The most bioavailable form comes from cold-water fatty fish (salmon, mackerel, sardines).",
-    mechanism: "Intense weight training creates micro-damage in muscle fibres and a systemic inflammatory response. EPA and DHA get incorporated into cell membranes and produce anti-inflammatory signalling molecules (resolvins, protectins). This reduces delayed-onset muscle soreness (DOMS), supports joint health (especially important for heavy squats/deadlifts), improves insulin sensitivity, and supports cardiovascular health.",
-    timing: "Split across meals (e.g. 1g with breakfast, 1g with dinner). Take with food containing fat for absorption. Fish oil can cause mild blood thinning — if you're on blood thinners or have surgery scheduled, consult your doctor.",
-    note: "Look for molecularly distilled oil (heavy-metal free, no PCB contaminants) with at least 500mg EPA + 250mg DHA per capsule. \"Pharmaceutical grade\" is marketing — read the label. Store in the fridge to prevent rancidity. Vegetarian option: algal oil (DHA only, EPA must come from conversion)."
+    mechanism: "Intense weight training creates micro-damage in muscle fibres and a systemic inflammatory response. EPA and DHA get incorporated into cell membranes and produce anti-inflammatory signalling molecules (resolvins, protectins). This reduces delayed-onset muscle soreness (DOMS), supports joint health, improves insulin sensitivity, and supports cardiovascular health.",
+    timing: "Split across meals (e.g. 1g with breakfast, 1g with dinner). Take with food containing fat for absorption.",
+    note: "Look for molecularly distilled oil (heavy-metal free, no PCB contaminants) with at least 500mg EPA + 250mg DHA per capsule. Store in the fridge to prevent rancidity. Vegetarian option: algal oil."
   },
   {
     name: "Multivitamin",
     category: "Everyday",
     dose: "1 serving daily with food",
     what: "A broad-spectrum blend of vitamins and minerals covering the full micronutrient spectrum. Not a replacement for whole foods, but a safety net.",
-    mechanism: "Every metabolic pathway in the body depends on micronutrients — B vitamins for energy metabolism, zinc and magnesium for testosterone production and sleep quality, selenium for thyroid function, iron for oxygen transport. On a restricted diet (cutting) or a repetitive meal plan, even with whole foods, you can develop subclinical deficiencies that blunt recovery and performance.",
-    timing: "Take with your largest meal. Avoid taking on an empty stomach — fat-soluble vitamins (A, D, E, K) need dietary fat for absorption, and water-soluble B vitamins can cause nausea on an empty stomach.",
-    note: "Choose one with bioavailable forms: methylated B vitamins (methylfolate, methylcobalamin), chelated minerals (zinc picolinate, magnesium glycinate), and adequate vitamin D (at least 2000 IU — many multi's only have 400 IU). Avoid brands with excessive iron if you're a man getting enough from diet (iron overload is a real concern)."
+    mechanism: "Every metabolic pathway in the body depends on micronutrients — B vitamins for energy metabolism, zinc and magnesium for testosterone production and sleep quality, selenium for thyroid function, iron for oxygen transport.",
+    timing: "Take with your largest meal. Avoid taking on an empty stomach — fat-soluble vitamins (A, D, E, K) need dietary fat for absorption.",
+    note: "Choose one with bioavailable forms: methylated B vitamins (methylfolate, methylcobalamin), chelated minerals (zinc picolinate, magnesium glycinate), and adequate vitamin D (at least 2000 IU). Avoid brands with excessive iron if you're a man getting enough from diet."
   },
   {
     name: "Casein Protein",
     category: "Optional (Nice-to-Have)",
     dose: "30-40g before bed",
     what: "The other major milk protein (80% of milk protein vs 20% whey). Casein clots in the acidic environment of the stomach, releasing amino acids slowly over 6-8 hours.",
-    mechanism: "While you sleep, you're in an 8-hour fast. Without a slow-release protein source, your body may shift toward muscle breakdown for amino acids. Casein provides a steady, low-level trickle of amino acids throughout the night, keeping you in a net positive protein balance. This is especially valuable during cutting (restricted calories make muscle preservation harder).",
-    timing: "30-40g immediately before bed. Mix with water or unsweetened almond/oat milk. Do take it every night, not just training days — recovery happens 24/7.",
-    note: "Also dairy-based — same rules as whey: use isolate or look for plant alternatives. Soy protein isolate has similar slow-digesting properties. If your total daily protein is already adequate (1g/lb bodyweight), casein is optional — total daily protein matters more than timing."
+    mechanism: "While you sleep, you're in an 8-hour fast. Without a slow-release protein source, your body may shift toward muscle breakdown for amino acids. Casein provides a steady, low-level trickle of amino acids throughout the night.",
+    timing: "30-40g immediately before bed. Mix with water or unsweetened almond/oat milk. Take it every night, not just training days — recovery happens 24/7.",
+    note: "Also dairy-based — same rules as whey: use isolate or look for plant alternatives. Soy protein isolate has similar slow-digesting properties."
   },
   {
     name: "Pre-Workout (Caffeine)",
     category: "Optional (Nice-to-Have)",
     dose: "200-400mg caffeine 30-45 min before training",
     what: "Caffeine is the most widely used ergogenic aid. It's a central nervous system stimulant that blocks adenosine receptors, reducing perceived effort and fatigue.",
-    mechanism: "Adenosine builds up during the day and makes you feel tired. Caffeine is structurally similar and binds to adenosine receptors without activating them — effectively turning off the 'I'm tired' signal. This allows you to train with more focus, push past mental barriers on heavy sets, and maintain higher rep quality late in the session. A good black coffee or pre-workout formula can add 1-3 reps to your working sets.",
-    timing: "200-400mg caffeine 30-45 minutes before your workout. 1 cup of coffee (~100mg), 2 cups hits 200mg. If using a pre-workout formula, follow label dosing — many contain 200-350mg per scoop plus other ingredients (beta-alanine, citrulline malate) that reduce fatigue and improve pumps.",
-    note: "If you train in the evening, caffeine can disrupt sleep. Limit to morning/afternoon sessions, or use a low/no-stim pre-workout. Tolerance builds — if 200mg stops working, take a 1-2 week tolerance break rather than increasing dose. Avoid high-stim pre-workouts if you have heart conditions or anxiety."
+    mechanism: "Adenosine builds up during the day and makes you feel tired. Caffeine is structurally similar and binds to adenosine receptors without activating them — effectively turning off the 'I'm tired' signal.",
+    timing: "200-400mg caffeine 30-45 minutes before your workout. 1 cup of coffee (~100mg). If using a pre-workout formula, follow label dosing — many contain 200-350mg per scoop.",
+    note: "If you train in the evening, caffeine can disrupt sleep. Limit to morning/afternoon sessions. Tolerance builds — if 200mg stops working, take a 1-2 week tolerance break rather than increasing dose."
   }
 ];
 
-function genMealTemplate(bw, isWorkoutDay, phase) {
-  const calc = phase === "bulking" ? calcBulking : calcCutting;
-  const m = calc(bw);
+// ===== WEEK DATA GENERATOR =====
+
+function getWorkoutTitle(dayOfWeek) {
+  const titles = {
+    0: "Push",
+    2: "Pull",
+    3: "Upper Body A",
+    4: "Legs",
+    5: "Upper Body B"
+  };
+  return titles[dayOfWeek] || "Rest";
+}
+
+function getDayData(weekNum, dayOfWeek) {
+  const isRest = (dayOfWeek === 1 || dayOfWeek === 6);
+  const isWorkout = !isRest;
+  const info = getPhaseForWeek(weekNum);
+
+  const meals = isCutWeek(weekNum) ? CUT_MEALS : BULK_MEALS;
+  const nutMacros = meals.macros;
+
+  if (isRest) {
+    return {
+      dayName: DAY_NAMES[dayOfWeek],
+      dayOfWeek: dayOfWeek,
+      type: "rest",
+      title: dayOfWeek === 1 ? "Rest Day" : "Rest / Active Recovery",
+      exercises: [],
+      nutrition: {
+        macros: nutMacros,
+        meals: meals.meals
+      },
+      supplements: SUPPLEMENTS_REST,
+      isDeload: false
+    };
+  }
+
+  const exercises = getExercisesForDay(weekNum, dayOfWeek);
+
   return {
-    macros: m,
-    meals: [
-      { name: "Breakfast", items: "Eggs, oatmeal, banana", cal: Math.round(m.cals * 0.25), protein: Math.round(m.protein * 0.25) },
-      { name: "Lunch", items: "Chicken/beef, rice, vegetables", cal: Math.round(m.cals * 0.3), protein: Math.round(m.protein * 0.3) },
-      { name: isWorkoutDay ? "Pre-Workout (30min before)" : "Afternoon Snack", items: isWorkoutDay ? "Whey protein + banana/rice milk" : "Nuts, fruit, protein shake", cal: Math.round(m.cals * 0.15), protein: Math.round(m.protein * 0.15) },
-      { name: isWorkoutDay ? "Post-Workout" : "Dinner", items: isWorkoutDay ? "Whey protein + rice/white potato + creatine 5g" : "Fish/chicken, sweet potato, vegetables", cal: Math.round(m.cals * 0.2), protein: Math.round(m.protein * 0.2) },
-      { name: "Dinner", items: "Lean meat, carbs, vegetables", cal: Math.round(m.cals * 0.1), protein: Math.round(m.protein * 0.1) }
-    ]
+    dayName: DAY_NAMES[dayOfWeek],
+    dayOfWeek: dayOfWeek,
+    type: info.isDeload ? "deload" : "workout",
+    title: getWorkoutTitle(dayOfWeek) + (info.isDeload ? " (Deload)" : ""),
+    exercises: exercises,
+    nutrition: {
+      macros: nutMacros,
+      meals: meals.meals
+    },
+    supplements: SUPPLEMENTS_DAILY,
+    isDeload: info.isDeload
   };
 }
 
-const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
-function isRestDay(dayOfWeek) {
-  return dayOfWeek === 1; // Tuesday
-}
-
-function getWeekData(weekNum, bw, phase) {
+function getWeekData(weekNum) {
   const days = [];
-  const isPhase2 = weekNum > 8;
-
   for (let d = 0; d < 7; d++) {
-    if (isRestDay(d)) {
-      const nut = genMealTemplate(bw, false, phase);
-      days.push({
-        dayName: DAY_NAMES[d],
-        dayOfWeek: d,
-        type: "rest",
-        title: "Rest Day",
-        exercises: [],
-        nutrition: nut,
-        supplements: SUPPLEMENTS_REST
-      });
-      continue;
-    }
-
-    const nut = genMealTemplate(bw, true, phase);
-    let exercises = [];
-    let title = "";
-
-    switch(d) {
-      case 0:
-        title = "Chest & Calves";
-        exercises = [
-          { name: "Incline Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
-          { name: "Incline Dumbbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
-          { name: "Flat Barbell Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
-          { name: isPhase2 ? "Dip (Chest Variation)" : "Flat Dumbbell Bench Press", numSets: 3, reps: isPhase2 ? "6-8" : "4-6", rest: isPhase2 ? "2 min" : "3 min" },
-          { name: "Standing Calf Raise", numSets: 3, reps: "4-6", rest: "2-3 min" },
-          { name: "Seated Calf Raise", numSets: 3, reps: "4-6", rest: "2-3 min" }
-        ];
-        break;
-      case 2:
-        title = "Back & Abs";
-        exercises = [
-          { name: "Barbell Deadlift", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
-          { name: "Barbell Row", numSets: 3, reps: "4-6", rest: "3 min" },
-          { name: "Wide-Grip Pull-Up", numSets: 3, reps: "4-6", rest: "3 min" },
-          { name: "Barbell Shrug", numSets: 2, reps: "4-6", rest: "3 min", optional: true },
-          { name: "Cable Crunch", numSets: 1, reps: "10-12 weighted", rest: "→", circuit: true },
-          { name: "Captain's Chair Leg Raise", numSets: 1, reps: "to failure", rest: "→", circuit: true },
-          { name: "Air Bicycle", numSets: 1, reps: "to failure", rest: "2-3 min", circuit: true }
-        ];
-        break;
-      case 3:
-        title = "Shoulders & Calves";
-        exercises = [
-          { name: "Seated Barbell Military Press", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
-          { name: "Side Lateral Raise", numSets: 3, reps: "4-6", rest: "2-3 min" },
-          { name: "Bent-Over Rear Delt Raise", numSets: 3, reps: "4-6", rest: "2-3 min" },
-          { name: "Leg Press Calf Raise", numSets: 3, reps: "8-10", rest: "1-2 min" },
-          { name: "Standing Calf Raise", numSets: 3, reps: "8-10", rest: "1-2 min" }
-        ];
-        break;
-      case 4:
-        title = "Upper Body & Abs";
-        exercises = [
-          { name: "Incline Barbell Bench Press", numSets: 3, reps: "8-10", rest: "2 min", warmup: true },
-          { name: "Barbell Curl", numSets: 3, reps: "4-6", rest: "3 min" },
-          { name: "Close-Grip Bench Press", numSets: 3, reps: "4-6", rest: "3 min" },
-          { name: "Alternating Dumbbell Curl", numSets: 3, reps: "4-6", rest: "3 min" },
-          { name: "Seated Triceps Press", numSets: 3, reps: "4-6", rest: "3 min" },
-          { name: isPhase2 ? "Ab Roller" : "Hanging Leg Raise", numSets: 1, reps: "10-12 weighted", rest: "→", circuit: true },
-          { name: "Flat Bench Lying Leg Raise", numSets: 1, reps: "to failure", rest: "→", circuit: true },
-          { name: "Decline Crunch", numSets: 1, reps: "to failure", rest: "2-3 min", circuit: true }
-        ];
-        break;
-      case 5:
-        title = "Legs & Shoulders";
-        exercises = [
-          { name: "Barbell Squat", numSets: 3, reps: "4-6", rest: "3 min", warmup: true },
-          { name: "Leg Press", numSets: 3, reps: "4-6", rest: "3 min" },
-          { name: "Romanian Deadlift", numSets: 3, reps: "4-6", rest: "3 min" },
-          { name: "Side Lateral Raise", numSets: 3, reps: "8-10", rest: "1-2 min" },
-          { name: "Bent-Over Rear Delt Raise", numSets: 3, reps: "8-10", rest: "1-2 min" },
-          { name: isPhase2 ? "Donkey Calf Raise" : "Seated Calf Raise", numSets: 3, reps: "12-15", rest: "1 min" },
-          { name: "Standing Calf Raise", numSets: 3, reps: "12-15", rest: "1 min" }
-        ];
-        break;
-      default:
-        title = "Rest / Active Recovery";
-        exercises = [];
-    }
-
-    if (d === 6) {
-      days.push({
-        dayName: DAY_NAMES[d],
-        dayOfWeek: d,
-        type: "rest",
-        title: "Rest / Active Recovery",
-        exercises: [],
-        nutrition: genMealTemplate(bw, false, phase),
-        supplements: SUPPLEMENTS_REST
-      });
-    } else {
-      days.push({
-        dayName: DAY_NAMES[d],
-        dayOfWeek: d,
-        type: "workout",
-        title: title,
-        exercises: exercises,
-        nutrition: nut,
-        supplements: SUPPLEMENTS_DAILY
-      });
-    }
+    days.push(getDayData(weekNum, d));
   }
-
   return { week: weekNum, days };
 }
 
 // ===== APP STATE =====
 
-const STORAGE_KEY = "bls_progress";
+const STORAGE_KEY = "bls40_progress";
 
 function loadProgress() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {}, bw: USER_BW };
-  } catch { return { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {}, bw: USER_BW }; }
+    return raw ? JSON.parse(raw) : { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {} };
+  } catch { return { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {} }; }
 }
 
 function saveProgress(p) {
@@ -740,17 +949,7 @@ function getStorage() {
   const p = loadProgress();
   if (!p.sets) p.sets = {};
   if (!p.rpe) p.rpe = {};
-  if (!p.bw) p.bw = USER_BW;
-  if (!p.phase) p.phase = "cutting";
   return p;
-}
-
-function togglePhase() {
-  const p = getStorage();
-  p.phase = p.phase === "cutting" ? "bulking" : "cutting";
-  saveProgress(p);
-  showToast("Switched to " + (p.phase === "cutting" ? "Cutting" : "Bulking") + " macros");
-  render();
 }
 
 // ===== IMPORT / EXPORT =====
@@ -761,7 +960,7 @@ function exportData() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `bls-program-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `bls40-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
   showToast("Progress saved to file");
@@ -841,21 +1040,28 @@ function makeId(prefix, ...parts) {
 
 function render() {
   const p = getStorage();
-  const bw = p.bw || USER_BW;
-  const phase = p.phase || "cutting";
+
+  // Header phase badge
+  const info = getPhaseForWeek(currentWeek);
+  const phaseLabel = getPhaseLabel(info.phase);
+  const badge = document.getElementById("headerPhaseBadge");
+  badge.textContent = phaseLabel + (info.isDeload ? " — Deload" : "");
 
   // Week nav
   const nav = document.getElementById("weekNav");
   nav.innerHTML = "";
-  for (let w = 1; w <= 12; w++) {
+  for (let w = 1; w <= TOTAL_WEEKS; w++) {
     const btn = document.createElement("button");
-    btn.className = "week-btn" + (w === currentWeek ? " active" : "");
+    const wi = getPhaseForWeek(w);
+    let cls = "week-btn" + (w === currentWeek ? " active" : "");
+    if (wi.isDeload) cls += " deload";
+    btn.className = cls;
     let allDone = true;
     for (let d = 0; d < 7; d++) {
       const dayKey = makeId("day", w, d);
       if (!p.days[dayKey]) { allDone = false; break; }
     }
-    if (allDone) btn.className += " completed";
+    if (allDone) btn.className = cls + " completed";
     btn.textContent = "W" + w;
     btn.onclick = () => { currentWeek = w; render(); };
     nav.appendChild(btn);
@@ -864,40 +1070,44 @@ function render() {
   const content = document.getElementById("weekContent");
   content.innerHTML = "";
 
-  const week = getWeekData(currentWeek, bw, phase);
+  const week = getWeekData(currentWeek);
 
-  // Update phase toggle button text
-  const phaseBtn = document.getElementById("phaseToggle");
-  if (phaseBtn) {
-    const opposite = phase === "cutting" ? "Bulking" : "Cutting";
-    phaseBtn.textContent = "Switch to " + opposite;
-  }
+  // Phase info banner
+  const phaseInfo = getPhaseForWeek(currentWeek);
+  const phaseNames = {1: "Phase 1 — Cut (4-6 rep range, Bench/Deadlift focus)", 2: "Phase 2 — Cut (Exercise rotation, Front Squats + Bulgarian Split Squats)", 3: "Phase 3 — Bulk (Standing OHP, Barbell Row return)", 4: "Phase 4 — Bulk (Arnold Press, new exercises)"};
+  const phaseLabelDiv = document.createElement("div");
+  phaseLabelDiv.style.cssText = "text-align:center;margin-bottom:12px;font-size:0.85em;color:var(--text-dim);padding:8px;background:var(--card);border-radius:8px;border:1px solid var(--border);";
+  phaseLabelDiv.innerHTML = phaseInfo.isDeload
+    ? `<strong>Deload Week</strong> &mdash; 2 sets of 2 reps on compounds, 2 sets of 4 reps on accessories. Reduce intensity, keep form sharp.`
+    : `<strong>${phaseNames[phaseInfo.phase] || "Phase " + phaseInfo.phase}</strong>`;
+  content.appendChild(phaseLabelDiv);
 
-  const phaseLabel = document.createElement("div");
-  phaseLabel.style.cssText = "text-align:center;margin-bottom:12px;font-size:0.85em;color:var(--text-dim);padding:8px;background:var(--card);border-radius:8px;border:1px solid var(--border);";
-  phaseLabel.innerHTML = currentWeek <= 8
-    ? `Phase 1 (Weeks 1-8) &mdash; Foundation &mdash; Heavy compound emphasis, 4-6 rep range`
-    : `Phase 2 (Weeks 9-12) &mdash; Variation &mdash; Adjusted rep ranges, exercise rotation`;
-  content.appendChild(phaseLabel);
-
-  const abNote = document.createElement("div");
-  abNote.style.cssText = "text-align:center;margin-bottom:12px;font-size:0.8em;color:var(--orange);padding:6px 12px;background:var(--card);border-radius:8px;border:1px solid var(--border);";
-  abNote.innerHTML = "Ab circuits: Do 3-6 rounds &bull; Add weight to first exercise when 12+ reps possible";
-  content.appendChild(abNote);
+  // Nutrition banner
+  const nutPhase = isCutWeek(currentWeek) ? "<span style='color:var(--green)'>Cut</span>" : "<span style='color:var(--orange)'>Bulk (Lean Gain)</span>";
+  const nutInfo = isCutWeek(currentWeek) ? CUT_MEALS : BULK_MEALS;
+  const nutNote = document.createElement("div");
+  nutNote.style.cssText = "text-align:center;margin-bottom:12px;font-size:0.8em;color:var(--text-dim);padding:6px 12px;background:var(--card);border-radius:8px;border:1px solid var(--border);";
+  nutNote.innerHTML = `Meal Plan: ${nutPhase} &mdash; ${nutInfo.macros.cals} cal &bull; P${nutInfo.macros.protein}g &bull; C${nutInfo.macros.carbs}g &bull; F${nutInfo.macros.fat}g`;
+  content.appendChild(nutNote);
 
   for (const day of week.days) {
     const card = document.createElement("div");
     const dayKey = makeId("day", currentWeek, day.dayOfWeek);
-    card.className = "day-card" + (p.days[dayKey] ? " completed-day" : "") + (day.type === "rest" ? " rest-day" : "");
+    let cardCls = "day-card" + (p.days[dayKey] ? " completed-day" : "");
+    if (day.type === "rest") cardCls += " rest-day";
+    if (day.type === "deload") cardCls += " deload-day";
+    card.className = cardCls;
 
     const hdr = document.createElement("div");
     hdr.className = "day-header";
+    const typeLabel = day.type === "rest" ? "REST" : day.type === "deload" ? "DELOAD" : "WORKOUT";
+    const typeCls = day.type === "rest" ? "rest" : day.type === "deload" ? "deload" : "workout";
     hdr.innerHTML = `
       <div>
         <h2>${day.dayName} — ${day.title}</h2>
       </div>
       <div>
-        <span class="day-type ${day.type}">${day.type === "rest" ? "REST" : "WORKOUT"}</span>
+        <span class="day-type ${typeCls}">${typeLabel}</span>
         <span class="day-check ${p.days[dayKey] ? "checked" : ""}" data-key="${dayKey}" data-type="day">${p.days[dayKey] ? "✓" : "○"}</span>
       </div>
     `;
@@ -912,18 +1122,24 @@ function render() {
       secTitle.textContent = "Exercises";
       sec.appendChild(secTitle);
 
-      if (day.exercises.some(e => e.warmup)) {
+      if (day.exercises.some(e => e.warmup) && !day.isDeload) {
         const warmNote = document.createElement("div");
         warmNote.style.cssText = "font-size:0.78em;color:var(--orange);margin-bottom:8px;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border);";
         warmNote.innerHTML = "Warm-up: 12 reps @50% &bull; 10 reps @50% &bull; 4 reps @70% &bull; 1 rep @90% &bull; Then working sets";
         sec.appendChild(warmNote);
       }
 
+      if (day.isDeload) {
+        const deloadNote = document.createElement("div");
+        deloadNote.style.cssText = "font-size:0.78em;color:var(--orange);margin-bottom:8px;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border);";
+        deloadNote.innerHTML = "Deload: 2 sets of 2 reps on compounds, 2 sets of 4 reps on accessories. Reduce weight 20-30% from working sets.";
+        sec.appendChild(deloadNote);
+      }
+
       day.exercises.forEach(ex => {
         const item = document.createElement("div");
         item.className = "exercise-item";
         const exKey = makeId("ex", currentWeek, day.dayOfWeek, ex.name.replace(/[^a-z0-9]/gi, "_"));
-        const extra = ex.circuit ? "(Circuit)" : ex.optional ? "(Optional)" : "";
 
         // Build set log HTML
         let setLogHtml = "";
@@ -963,7 +1179,7 @@ function render() {
         item.innerHTML = `
           <div class="exercise-header">
             <div>
-              <div class="exercise-name">${ex.name} ${extra}</div>
+              <div class="exercise-name">${ex.name}</div>
               <div class="exercise-specs">${ex.numSets} x ${ex.reps} &bull; Rest ${ex.rest}</div>
             </div>
             <span class="exercise-check ${p.exercises[exKey] ? "checked" : ""}" data-key="${exKey}" data-type="exercise">${p.exercises[exKey] ? "✓" : "○"}</span>
@@ -987,8 +1203,8 @@ function render() {
     if (day.nutrition) {
       const sec = document.createElement("div");
       sec.className = "section";
-      const phaseLabel = (p.phase || "cutting") === "cutting" ? "Cutting" : "Bulking";
-      sec.innerHTML = `<div class="section-title">Nutrition — ${phaseLabel} (${day.nutrition.macros.cals} cal/day)</div>`;
+      const mealPhaseName = isCutWeek(currentWeek) ? "Cut" : "Bulk (Lean Gain)";
+      sec.innerHTML = `<div class="section-title">Nutrition — ${mealPhaseName} (${day.nutrition.macros.cals} cal/day)</div>`;
       const macroRow = document.createElement("div");
       macroRow.className = "macro-row";
       macroRow.innerHTML = `
@@ -1002,18 +1218,13 @@ function render() {
       const mealList = document.createElement("ul");
       mealList.className = "meal-list";
 
-      const dairyNote = document.createElement("div");
-      dairyNote.style.cssText = "font-size:0.78em;color:var(--orange);margin-bottom:8px;padding:4px 8px;background:var(--bg);border-radius:6px;";
-      dairyNote.innerHTML = "No dairy. Use whey isolate (low lactose) or plant protein. Use olive/coconut oil instead of butter. Nut-based milks instead of dairy.";
-      sec.appendChild(dairyNote);
-
       day.nutrition.meals.forEach((meal, i) => {
         const mealKey = makeId("meal", currentWeek, day.dayOfWeek, i);
         const li = document.createElement("li");
         li.innerHTML = `
           <span class="meal-check ${p.meals[mealKey] ? "checked" : ""}" data-key="${mealKey}" data-type="meal">${p.meals[mealKey] ? "✓" : "○"}</span>
           <span class="meal-name"><strong>${meal.name}</strong>: ${meal.items}</span>
-          <span class="meal-cal">${meal.protein}g P / ~${meal.cal}cal</span>
+          <span class="meal-cal">${meal.detail}</span>
         `;
         mealList.appendChild(li);
       });
@@ -1038,7 +1249,7 @@ function render() {
         sec.appendChild(div);
       });
 
-      if (day.type === "workout") {
+      if (day.type === "workout" || day.type === "deload") {
         const note = document.createElement("div");
         note.style.cssText = "font-size:0.78em;color:var(--text-dim);margin-top:6px;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border);";
         note.innerHTML = "Take creatine with post-workout meal (protein + carbs). No need to cycle — 5g daily.";
@@ -1070,14 +1281,12 @@ function handleSetInput(input) {
 function handleRpe(rpeKey, value, el) {
   const p = getStorage();
   if (!p.rpe) p.rpe = {};
-  // Toggle: if same value clicked, deselect
   if (p.rpe[rpeKey] === value) {
     delete p.rpe[rpeKey];
   } else {
     p.rpe[rpeKey] = value;
   }
   saveProgress(p);
-  // Update visual immediately
   const parent = el.parentElement;
   parent.querySelectorAll(".rpe-dot").forEach(d => d.classList.remove("selected"));
   if (p.rpe[rpeKey]) {
@@ -1089,10 +1298,9 @@ function handleRpe(rpeKey, value, el) {
 
 function updateStats(p) {
   const allKeys = new Set();
-  const phase = p.phase || "cutting";
 
-  for (let w = 1; w <= 12; w++) {
-    const week = getWeekData(w, p.bw || USER_BW, phase);
+  for (let w = 1; w <= TOTAL_WEEKS; w++) {
+    const week = getWeekData(w);
     for (const day of week.days) {
       allKeys.add(makeId("day", w, day.dayOfWeek));
       for (const ex of day.exercises) {
@@ -1121,7 +1329,7 @@ function updateStats(p) {
   document.getElementById("statDays").textContent = doneCount + "/" + allKeys.size;
 
   let streak = 0;
-  for (let w = 1; w <= 12; w++) {
+  for (let w = 1; w <= TOTAL_WEEKS; w++) {
     let allDaysDone = true;
     for (let d = 0; d < 7; d++) {
       if (!p.days[makeId("day", w, d)]) { allDaysDone = false; break; }
