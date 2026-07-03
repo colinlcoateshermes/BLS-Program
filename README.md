@@ -46,11 +46,11 @@ Weeks 9, 18, 27, 36, 45, 54 are **deload weeks** — 2 sets of 2 reps on compoun
 
 All training sessions follow this morning schedule:
 
-1. **Pre-Workout Shake**: 2 scoops whey isolate (cut) / 1.5 scoops (bulk) + 5g creatine + pre-workout (caffeine)
+1. **Pre-Workout**: 2 scoops whey isolate (cut) / 1.5 scoops (bulk) + 5g creatine + pre-workout (caffeine) in water
 2. **WORKOUT** (60-75 min)
-3. **Post-Workout Breakfast**: Two options daily — omelette-based (A) or granola/smoothie-based (B)
+3. **Post-Workout Breakfast**: Choose from 5 breakfast options — omelette, granola, smoothie, toast, or overnight oats
 
-The app's meal plans are ordered accordingly — Pre-Workout first, then Post-Workout Breakfast after the workout.
+The app shows Breakfast, Lunch, and Dinner meal options each day with inline macros and checkboxes.
 
 ### Dairy-Free Notes
 
@@ -64,27 +64,68 @@ All meal plans are **100% dairy-free**:
 
 ## Meal Plans
 
-The app automatically serves the correct meal plan based on the current phase:
+The app automatically serves the correct meal plan based on the current phase. Each phase provides **5 breakfast, 5 lunch, and 5 dinner options** with individual macros — pick your preferred options each day and track them with checkboxes.
 
 | Phase | Meal Plan | Macros |
 |-------|-----------|--------|
-| **Cut (Phases 1-2, Wks 1-18)** | Official BLS 4.0 210lb Cut (dairy-free, soy milk, breakfast options) | 2,309 cal — 227P / 237C / 50F (5 meals) |
-| **Bulk (Phases 3-6, Wks 19-54)** | Official BLS 4.0 210lb Lean Gain (dairy-free, soy milk, breakfast options) | 3,351 cal — 213P / 475C / 80F (6 meals) |
+| **Cut (Phases 1-2, Wks 1-18)** | Official BLS 4.0 210lb Cut (dairy-free, soy milk, 5+5+5 options with macros) | 2,309 cal — 227P / 237C / 50F |
+| **Bulk (Phases 3-6, Wks 19-54)** | Official BLS 4.0 210lb Lean Gain (dairy-free, soy milk, 5+5+5 options with macros) | 3,351 cal — 213P / 475C / 80F |
 
-### Cut Meals (2,309 cal) — Morning Workout Schedule
-1. **Pre-Workout**: 2 scoops whey isolate, creatine, pre-workout (caffeine)
-2. **Breakfast**: OPTION A: 3-egg omelette + oatmeal + berries + black coffee/soy milk | OPTION B: granola + soy yogurt + berries + smoothie
-3. **Lunch**: Chicken breast, taco shells, sweet corn, bell pepper, cabbage, Sriracha (no cheese)
-4. **Snack**: Soy-based protein yogurt + blueberries + cinnamon
-5. **Dinner**: Pork tenderloin, brown rice, broccoli, bell pepper, soy sauce, gummy bears
+### Cut Meal Options (2,309 cal)
 
-### Bulk Meals (3,351 cal) — Morning Workout Schedule
-1. **Pre-Workout**: 1.5 scoops whey isolate, creatine, pre-workout (caffeine)
-2. **Breakfast**: OPTION A: 3-egg omelette + bagel + tomato + OJ + black coffee | OPTION B: granola + soy yogurt + berries + banana + OJ
-3. **Lunch**: Chicken breast, lentils, onion, tomato, chicken broth
-4. **Snack**: Whey shake (soy milk), 2 bananas, almond butter
-5. **Dinner**: Hamburger bun, lean beef, tomato/lettuce, ketchup, dairy-free ice cream
-6. **Pre-Bed**: Casein shake (soy milk), pineapple
+Each meal category has 5 options — pick one per meal:
+
+**Breakfast (5 options)** — 580-650 cal:
+1. **3-Egg Omelette Plate** — 3 whole eggs + 50g oatmeal + 100g berries + soy milk/black coffee
+2. **Granola & Soy Yogurt** — 65g granola + 200g soy yogurt + 100g berries + black coffee
+3. **Protein Smoothie** — 2 scoops whey + 300ml soy milk + 50g oats + 100g berries + spinach
+4. **Eggs & Toast** — 2 whole eggs + 100g egg whites + 2 slices toast + 1 tbsp peanut butter
+5. **Overnight Oats** — 50g oats + 1 scoop whey + 200ml soy milk + blueberries + cinnamon
+
+**Lunch (5 options)** — 700-780 cal:
+1. **Chicken Taco Bowl** — 260g chicken + 2 taco shells + corn + bell pepper + cabbage + Sriracha
+2. **Turkey & Sweet Potato** — 200g lean turkey + 150g sweet potato + 100g broccoli
+3. **Salmon & Quinoa** — 200g salmon + 100g quinoa + 100g asparagus
+4. **Chicken Garden Salad** — 250g chicken + mixed greens + light vinaigrette + croutons
+5. **Lean Beef & Rice** — 200g lean ground beef + 150g brown rice + bell pepper + onion
+
+**Dinner (5 options)** — 670-740 cal:
+1. **Pork Tenderloin Bowl** — 240g pork + 60g brown rice + broccoli + bell pepper + soy sauce + gummy bears
+2. **Lemon Chicken & Quinoa** — 200g chicken + 100g quinoa + 100g zucchini + 50g almonds
+3. **White Fish & Rice** — 220g white fish + 100g jasmine rice + 100g green beans + lemon
+4. **Beef & Cauliflower Rice** — 200g lean ground beef + 100g brown rice + cauliflower rice
+5. **Chicken Thigh Roast** — 250g chicken thigh (skinless) + 200g broccoli + 80g sweet potato
+
+### Bulk Meal Options (3,351 cal)
+
+**Breakfast (5 options)** — 890-1060 cal:
+1. **Egg & Bagel Combo** — 3 eggs + 1 bagel + 100g tomato + 240ml OJ + black coffee
+2. **Granola Fruit Bowl** — 65g granola + 200g soy yogurt + 100g berries + 1 banana + 240ml OJ
+3. **Mass Protein Smoothie** — 2 scoops whey + 300ml soy milk + 60g oats + 1 banana + peanut butter
+4. **Ultimate Avocado Toast** — 3 whole eggs + 150g egg whites + 2 slices toast + 100g avocado + OJ
+5. **Loaded Oatmeal** — 80g oats + 1.5 scoops whey + 300ml soy milk + berries + 1 banana + almond butter
+
+**Lunch (5 options)** — 1080-1150 cal:
+1. **Chicken Lentil Soup** — 110g chicken + 120g lentils + 150g onion + 200g tomato + chicken broth
+2. **Salmon Avocado Bowl** — 200g salmon + 150g quinoa + 100g avocado + mixed greens
+3. **Chicken Cashew Rice** — 250g chicken + 200g brown rice + 100g bell pepper + 50g cashews
+4. **Beef & Sweet Potato** — 200g lean beef + 200g sweet potato + 100g broccoli + olive oil
+5. **Turkey Burrito Bowl** — 200g turkey + 150g brown rice + 100g black beans + 100g corn + salsa
+
+**Dinner (5 options)** — 1020-1160 cal:
+1. **Burger & Ice Cream** — bun + 95% lean beef + 100g tomato/lettuce + ketchup + dairy-free ice cream
+2. **Teriyaki Chicken Bowl** — 200g chicken thigh + 200g brown rice + roasted vegetables + teriyaki
+3. **Sesame Fish & Cashews** — 220g white fish + 150g jasmine rice + bok choy + sesame oil + cashews
+4. **Beef Pasta Bowl** — 200g lean beef + 200g pasta + marinara + parmesan
+5. **Chicken Edamame Bowl** — 150g chicken + 200g brown rice + 100g edamame + bell pepper + soy sauce
+
+### How It Works
+
+- Each day shows **Breakfast, Lunch, and Dinner** sections with all 5 options per meal
+- Tap any meal option to check it off as your choice for that day
+- Every option displays its **calories, protein, carbs, and fat** inline
+- Click **"Meal Plan"** button to open a full-screen modal with both Cut and Bulk tabbed views showing all options with macros
+- A **calorie tracker** on each day lets you log your actual daily intake
 
 ## Supplements
 
@@ -112,12 +153,12 @@ Vitamin D3 is covered by the multivitamin — no standalone supplement needed.
 ## Features
 
 - **Check-off persistence** — tap any circle to mark it complete. Taps are saved automatically to your browser (localStorage).
-- **Breakfast options** — each meal plan shows Option A and Option B for breakfast with individual check-off tracking.
+- **Meal options** — 5 breakfast, 5 lunch, and 5 dinner options with macros. Tap to check off your choices.
 - **Exercise descriptions** — tap "Show description" on any exercise for a full how-to, including links to relevant book screenshots.
 - **Set logging** — log weight and reps per set for every exercise. Data persists in the browser.
 - **RPE traffic light** — rate each exercise as Easy / OK / Hard.
 - **Image viewer** — tapping a screenshot link opens it full-screen. Tap again to close.
-- **Meal Plans Guide** — slide-in modal panel with detailed breakdown of each meal's purpose, timing, and substitutions.
+- **Meal Plan modal** — click \"Meal Plan\" to see all Cut/Bulk meal options with macros in a tabbed view.
 - **Supplements Guide** — slide-in modal panel with science-backed explanations for every supplement.
 - **Calorie tracker** — inline editable field on each day showing target and actual calories consumed, stored in localStorage.
 - **Progress stats** — completion percentage, total checkmarks, and weekly streak counter.
