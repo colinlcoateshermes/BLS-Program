@@ -104,6 +104,11 @@
   .day-header .day-type.workout { background: var(--green); }
   .day-check { font-size: 1.3em; color: var(--text-dim); cursor: pointer; }
   .day-check.checked { color: var(--green); }
+  .day-card.collapsed .section,
+  .day-card.collapsed .supplement-item,
+  .day-card.collapsed .supplement-note { display: none; }
+  .day-card.collapsed .day-header { margin-bottom: 0; }
+  .collapse-icon { font-size: 0.7em; color: var(--text-dim); margin-left: 6px; }
 
   /* Sections */
   .section { margin-bottom: 14px; }
@@ -916,8 +921,8 @@ const STORAGE_KEY = "bls40_progress";
 function loadProgress() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {}, calories: {} };
-  } catch { return { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {}, calories: {} }; }
+    return raw ? JSON.parse(raw) : { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {}, calories: {}, collapsed: {} };
+  } catch { return { exercises: {}, meals: {}, supplements: {}, days: {}, sets: {}, rpe: {}, calories: {}, collapsed: {} }; }
 }
 
 function saveProgress(p) {
@@ -1047,15 +1052,30 @@ function render() {
     // Header
     const hdr = document.createElement("div");
     hdr.className = "day-header";
+    const isCollapsed = p.collapsed && p.collapsed[dayKey];
     hdr.innerHTML = `
       <div>
         <h2>${day.dayName} — ${day.title}</h2>
       </div>
       <div>
+        <span class="collapse-icon">${isCollapsed ? "▶" : "▼"}</span>
         <span class="day-type ${day.type}">${day.type === "rest" ? "REST" : day.type === "deload" ? "DELOAD" : "WORKOUT"}</span>
         <span class="day-check ${p.days[dayKey] ? "checked" : ""}" data-key="${dayKey}" data-type="day">${p.days[dayKey] ? "✓" : "○"}</span>
       </div>
     `;
+    if (isCollapsed) card.classList.add("collapsed");
+    hdr.addEventListener("click", (e) => {
+      // Don't toggle collapse when clicking the day checkmark
+      if (e.target.classList.contains("day-check")) return;
+      card.classList.toggle("collapsed");
+      const st = getStorage();
+      if (!st.collapsed) st.collapsed = {};
+      st.collapsed[dayKey] = card.classList.contains("collapsed");
+      saveProgress(st);
+      // Update icon
+      const icon = hdr.querySelector(".collapse-icon");
+      if (icon) icon.textContent = st.collapsed[dayKey] ? "▶" : "▼";
+    });
     card.appendChild(hdr);
 
     // Exercises
@@ -1121,84 +1141,6 @@ function render() {
       card.appendChild(sec);
     }
 
-    // Nutrition
-    if (day.plan) {
-      const sec = document.createElement("div");
-      sec.className = "section";
-      const planLabel = week.phase <= 2 ? "CUT" : "BULK (LEAN GAIN)";
-      sec.innerHTML = `<div class="section-title">Nutrition — ${planLabel} (${day.plan.macros.cals} CAL/DAY)</div>`;
-      const macroRow = document.createElement("div");
-      macroRow.className = "macro-row";
-      macroRow.innerHTML = `
-        <span class="macro-pill">Protein <span class="val">${day.plan.macros.protein}g</span></span>
-        <span class="macro-pill">Carbs <span class="val">${day.plan.macros.carbs}g</span></span>
-        <span class="macro-pill">Fat <span class="val">${day.plan.macros.fat}g</span></span>
-        <span class="macro-pill">Calories <span class="val">${day.plan.macros.cals}</span></span>
-      `;
-      sec.appendChild(macroRow);
-
-      // Calorie tracker
-      const calKey = makeId("cal", currentWeek, day.dayOfWeek);
-      const calDiv = document.createElement("div");
-      calDiv.style.cssText = "display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:0.85em;";
-      calDiv.innerHTML = `
-        <span style="color:var(--text-dim)">Target:</span>
-        <span style="font-weight:700;color:var(--green)">${day.plan.macros.cals} cal</span>
-        <span style="color:var(--text-dim);margin-left:4px">Actual:</span>
-        <input type="number" min="0" step="1" placeholder="0"
-          style="width:80px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:0.95em;text-align:center"
-          value="${p.calories[calKey] || ""}"
-          data-calorie="${calKey}">
-      `;
-      sec.appendChild(calDiv);
-
-      // Meal Options — 5 breakfast, 5 lunch, 5 dinner with checkboxes
-      const mealSections = [
-        {title: "Breakfast", items: day.plan.breakfast, key: "breakfast"},
-        {title: "Lunch", items: day.plan.lunch, key: "lunch"},
-        {title: "Dinner", items: day.plan.dinner, key: "dinner"}
-      ];
-
-      const mealOptionsDiv = document.createElement("div");
-      mealOptionsDiv.innerHTML = `<div style="font-size:0.85em;font-weight:600;color:var(--text);margin-bottom:8px">Meal Options — Pick your choices</div>`;
-
-      mealSections.forEach(section => {
-        const block = document.createElement("div");
-        block.style.cssText = "margin-bottom:12px";
-        block.innerHTML = `<div style="font-size:0.82em;font-weight:600;color:var(--accent);margin-bottom:4px">${section.title}</div>`;
-
-        section.items.forEach((meal, idx) => {
-          const mealKey = makeId("meal", currentWeek, day.dayOfWeek, section.key, idx);
-          const checked = p.meals[mealKey] ? "checked" : "";
-          const symbol = p.meals[mealKey] ? "✓" : "○";
-          const item = document.createElement("div");
-          item.style.cssText = "display:flex;align-items:flex-start;gap:6px;padding:4px 6px;border-radius:6px;font-size:0.82em;line-height:1.4;cursor:pointer";
-          item.onmouseover = () => { item.style.background = "var(--bg)"; };
-          item.onmouseout = () => { item.style.background = "transparent"; };
-          item.addEventListener("click", () => {
-            const cb = item.querySelector(".meal-check");
-            if (cb) {
-              cb.classList.toggle("checked");
-              cb.textContent = cb.classList.contains("checked") ? "✓" : "○";
-              const st = getStorage();
-              st.meals[cb.dataset.key] = cb.classList.contains("checked");
-              saveProgress(st);
-            }
-          });
-          item.innerHTML = `
-            <span class="meal-check ${checked}" data-key="${mealKey}" data-type="meal" style="flex-shrink:0;margin-top:2px">${symbol}</span>
-            <span><strong>${meal.name}</strong> <span style="color:var(--text-dim);font-size:0.9em">${meal.cals} cal | ${meal.protein}P / ${meal.carbs}C / ${meal.fat}F</span><br><span style="color:var(--text-dim);font-size:0.88em">${meal.detail}</span></span>
-          `;
-          block.appendChild(item);
-        });
-
-        mealOptionsDiv.appendChild(block);
-      });
-
-      sec.appendChild(mealOptionsDiv);
-      card.appendChild(sec);
-    }
-
     // Supplements
     const supps = day.type === "rest" ? SUPPLEMENTS_REST : SUPPLEMENTS_DAILY;
     if (supps.length > 0) {
@@ -1218,6 +1160,7 @@ function render() {
 
       if (day.type !== "rest") {
         const note = document.createElement("div");
+        note.className = "supplement-note";
         note.style.cssText = "font-size:0.78em;color:var(--text-dim);margin-top:6px;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid var(--border);";
         note.innerHTML = "Take creatine in your pre-workout shake. No need to cycle — 5g daily.";
         sec.appendChild(note);
@@ -1280,10 +1223,6 @@ function attachListeners() {
     el.removeEventListener("click", handleRpeClick);
     el.addEventListener("click", handleRpeClick);
   });
-  document.querySelectorAll("[data-calorie]").forEach(el => {
-    el.removeEventListener("change", handleCalorieChange);
-    el.addEventListener("change", handleCalorieChange);
-  });
 }
 
 function handleCheck(e) {
@@ -1294,7 +1233,6 @@ function handleCheck(e) {
 
   let target;
   if (type === "exercise") target = p.exercises;
-  else if (type === "meal") target = p.meals;
   else if (type === "supplement") target = p.supplements;
   else target = p.days;
 
@@ -1341,19 +1279,6 @@ function handleRpeClick(e) {
     p.rpe[key] = val;
     document.querySelectorAll(`[data-rpe="${key}"]`).forEach(b => b.classList.remove("selected"));
     el.classList.add("selected");
-  }
-  saveProgress(p);
-}
-
-function handleCalorieChange(e) {
-  const el = e.currentTarget;
-  const key = el.dataset.calorie;
-  const val = el.value;
-  const p = getStorage();
-  if (val) {
-    p.calories[key] = parseInt(val, 10) || 0;
-  } else {
-    delete p.calories[key];
   }
   saveProgress(p);
 }
